@@ -9,3 +9,4 @@
 - Avoid `docker compose config` against compose files that load the real `.env`; it expands and prints secret-bearing environment values.
 - Autopilot API callers must handle both Anthropic JSON responses and SSE `text_delta` responses from the local proxy.
 - Docker images for this repo must exclude `.env`, `.claude/`, `local/`, and workspace state via `.dockerignore`; runtime secrets belong in compose `env_file`, not baked into the image.
+- When pushing to a personal repo with multiple GitHub accounts, `gh auth switch` is not enough if the remote uses SSH; set the repo remote to HTTPS with `gh auth setup-git`, and ensure the active account token has `workflow` scope before pushing `.github/workflows/*`.
