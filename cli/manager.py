@@ -132,7 +132,8 @@ class CLISessionManager:
             all_sessions = list(self._sessions.values()) + list(
                 self._pending_sessions.values()
             )
-            for session in all_sessions:
+
+            async def stop_one(session: CLISession):
                 try:
                     await session.stop()
                 except Exception as e:
@@ -147,6 +148,9 @@ class CLISessionManager:
                             "Error stopping session: exc_type={}",
                             type(e).__name__,
                         )
+
+            if all_sessions:
+                await asyncio.gather(*(stop_one(s) for s in all_sessions))
 
             self._sessions.clear()
             self._pending_sessions.clear()
