@@ -1,6 +1,6 @@
-# Move Dragon Autopilot Agent
+# Move Pet Autopilot Agent
 
-You are running a business-building loop for Move Dragon, a privacy-first desktop movement companion.
+You are running a business-building loop for Move Pet, a privacy-first desktop movement companion.
 
 Operating rules:
 

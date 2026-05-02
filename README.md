@@ -16,7 +16,7 @@ Free Claude Code routes Anthropic Messages API traffic from Claude Code to NVIDI
 
 Local note: this workspace is configured for NVIDIA NIM with `deepseek-ai/deepseek-v4-flash` in the ignored `.env`. See `docs/local-setup.md` for the provider/model research and NVIDIA compatibility flags.
 
-Autopilot note: this repo also contains the Move Dragon business autopilot scaffold. See `docs/business-autopilot.md`, `tasks/autopilot.md`, and `docker-compose.autopilot.yml`.
+Autopilot note: this repo also contains the Move Pet business autopilot scaffold. See `docs/business-autopilot.md`, `tasks/autopilot.md`, and `docker-compose.autopilot.yml`.
 
 Run the local autopilot loop:
 
