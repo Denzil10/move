@@ -1,0 +1,26 @@
+services:
+  proxy:
+    build:
+      context: .
+      dockerfile: Dockerfile.autopilot
+    command: ["uv", "run", "uvicorn", "server:app", "--host", "0.0.0.0", "--port", "8082"]
+    env_file:
+      - .env
+    ports:
+      - "8082:8082"
+
+  autopilot:
+    build:
+      context: .
+      dockerfile: Dockerfile.autopilot
+    command: ["uv", "run", "python", "scripts/autopilot_loop.py", "--interval-seconds", "300"]
+    env_file:
+      - .env
+    environment:
+      ANTHROPIC_BASE_URL: http://proxy:8082
+      ANTHROPIC_AUTH_TOKEN: freecc
+      AUTOPILOT_MODEL: sonnet
+    depends_on:
+      - proxy
+    volumes:
+      - ./local:/app/local

@@ -1,53 +1,117 @@
-# AGENTIC DIRECTIVE
+# AGENTS.md
 
-> This file is identical to CLAUDE.md. Keep them in sync.
+## Mode
 
-## CODING ENVIRONMENT
+This is a PERSONAL project, despite living under `~/Projects/personal/public`.
 
-- Install astral uv using "curl -LsSf https://astral.sh/uv/install.sh | sh" if not already installed and if already installed then update it to the latest version
-- Install Python 3.14 using `uv python install 3.14` if not already installed
-- Always use `uv run` to run files instead of the global `python` command.
-- Current uv ruff formatter is set to py314 which has supports multiple exception types without paranthesis (except TypeError, ValueError:)
-- Read `.env.example` for environment variables.
-- All CI checks must pass; failing checks block merge.
-- Add tests for new changes (including edge cases), then run `uv run pytest`.
-- Run checks in this order: `uv run ruff format`, `uv run ruff check`, `uv run ty check`, `uv run pytest`.
-- Do not add `# type: ignore` or `# ty: ignore`; fix the underlying type issue.
-- All 5 checks are enforced in `tests.yml` on push/merge.
+Workflow: explore current state, implement the smallest useful improvement, verify, record lessons after failures/corrections, then keep going autonomously. Skip heavy plan-first overhead unless the work is architectural, risky, or explicitly asks for a plan.
 
-## IDENTITY & CONTEXT
+## Product
 
-- You are an expert Software Architect and Systems Engineer.
-- Goal: Zero-defect, root-cause-oriented engineering for bugs; test-driven engineering for new features. Think carefully; no need to rush.
-- Code: Write the simplest code possible. Keep the codebase minimal and modular.
+Build and run Move Dragon on autopilot: a lightweight desktop companion that motivates people to move during gaming, work, coding, and social media.
 
-## ARCHITECTURE PRINCIPLES (see PLAN.md)
+Core behavior:
 
-- **Shared utilities**: Put shared Anthropic protocol logic in neutral `core/anthropic/` modules. Do not have one provider import from another provider's utils.
-- **DRY**: Extract shared base classes to eliminate duplication. Prefer composition over copy-paste.
-- **Encapsulation**: Use accessor methods for internal state (e.g. `set_current_task()`), not direct `_attribute` assignment from outside.
-- **Provider-specific config**: Keep provider-specific fields (e.g. `nim_settings`) in provider constructors, not in the base `ProviderConfig`.
-- **Dead code**: Remove unused code, legacy systems, and hardcoded values. Use settings/config instead of literals (e.g. `settings.provider_type` not `"nvidia_nim"`).
-- **Performance**: Use list accumulation for strings (not `+=` in loops), cache env vars at init, prefer iterative over recursive when stack depth matters.
-- **Platform-agnostic naming**: Use generic names (e.g. `PLATFORM_EDIT`) not platform-specific ones (e.g. `TELEGRAM_EDIT`) in shared code.
-- **No type ignores**: Do not add `# type: ignore` or `# ty: ignore`. Fix the underlying type issue.
-- **Complete migrations**: When moving modules, update imports to the new owner and remove old compatibility shims in the same change unless preserving a published interface is explicitly required.
-- **Maximum Test Coverage**: There should be maximum test coverage for everything, preferably live smoke test coverage to catch bugs early
+- Dragon appears after long inactivity and looks disturbed.
+- It gets happy when the user moves, floats with them, then disappears after 3 seconds.
+- Strict mode can lock keyboard/mouse until a movement target is met.
+- Motion detection stays local and lightweight.
+- Victory toast shows estimated calories burned.
 
-## COGNITIVE WORKFLOW
+Business behavior:
 
-1. **ANALYZE**: Read relevant files. Do not guess.
-2. **PLAN**: Map out the logic. Identify root cause or required changes. Order changes by dependency.
-3. **EXECUTE**: Fix the cause, not the symptom. Execute incrementally with clear commits.
-4. **VERIFY**: Run ci checks and relevant smoke tests. Confirm the fix via logs or output.
-5. **SPECIFICITY**: Do exactly as much as asked; nothing more, nothing less.
-6. **PROPAGATION**: Changes impact multiple files; propagate updates correctly.
+- Research, execute, review, improve continuously.
+- Use free-tier tools first.
+- Ask only for important business decisions.
+- Optimize for shipping and profitability.
 
-## SUMMARY STANDARDS
+## Autopilot
 
-- Summaries must be technical and granular.
-- Include: [Files Changed], [Logic Altered], [Verification Method], [Residual Risks] (if no residual risks then say none).
+Primary files:
 
-## TOOLS
+- `docs/business-autopilot.md` - product and business spec.
+- `docs/technical-research.md` - desktop, overlay, motion, strict-mode research.
+- `tasks/autopilot.md` - lightweight backlog.
+- `autopilot/prompts/system.md` - loop prompt.
+- `scripts/autopilot_loop.py` - 5-minute planner/executor/review loop.
+- `docker-compose.autopilot.yml` - proxy plus loop runner.
+- `memory/ontology/graph.jsonl` - project memory graph.
 
-- Prefer built-in tools (grep, read_file, etc.) over manual workflows. Check tool availability before use.
+Loop rules:
+
+- Run every 5 minutes when active.
+- Research before inventing; prefer proven open-source approaches.
+- Improve product, marketing, docs, and backlog.
+- Ask before pricing, public posting/launching, paid services, risky distribution choices, or new credentials.
+- Do not ask for routine implementation, research, docs, or local verification.
+
+## AI Provider
+
+This repo uses the imported `free-claude-code` proxy.
+
+Known local path:
+
+- Provider: NVIDIA NIM.
+- Model: `nvidia_nim/deepseek-ai/deepseek-v4-flash`.
+- Local Claude Code settings: ignored `.claude/settings.local.json`.
+- Proxy: `http://127.0.0.1:8082`.
+- Client env: `ANTHROPIC_BASE_URL=http://127.0.0.1:8082`.
+
+Reliability:
+
+- NVIDIA can be slow; long read timeouts are expected.
+- Use `NVIDIA_NIM_FORCE_NON_STREAMING=true`.
+- Top free models may time out or stream no chunks.
+- Autopilot callers must handle Anthropic JSON and SSE `text_delta`.
+
+Secrets:
+
+- Never print `.env`, global Claude settings, provider keys, Bedrock tokens, or compose-rendered env output.
+- Avoid `docker compose config` when compose loads real `.env`; it expands secrets.
+- Use redacted diagnostics.
+
+## Browser
+
+For browser/account setup, use profile 1 instructions from `/Users/denzil/.agents/mcp/BROWSER_USAGE.md` when available. If missing, do not improvise sensitive account flows. Login email if needed: `denzilnel114@gmail.com`. Browser-controlled free tools are allowed for free-tier workflows.
+
+## Engineering
+
+- Use `uv run`, not global `python`.
+- Python target is 3.14.
+- Prefer `rg` for search.
+- Read relevant files before changing behavior.
+- Keep changes small and modular.
+- Add focused tests for new logic.
+- Remove dead code and stale approaches after major iterations.
+- Do not add `# type: ignore` or `# ty: ignore`; fix the cause.
+
+Checks:
+
+- Full: `uv run ruff format`, `uv run ruff check .`, `uv run ty check`, `uv run pytest`.
+- Small edits: run the smallest meaningful subset plus `ruff check` on touched files.
+
+## Lessons
+
+Read `tasks/lessons.md` before substantial work. Current essentials:
+
+- Missing NVIDIA keys block proxy startup.
+- NVIDIA streaming can emit no chunks; force non-streaming and synthesize SSE.
+- Omit `parallel_tool_calls` on NVIDIA no-tool requests.
+- Disable optional thinking fields for GLM unless live probes prove OK.
+- Docker compose config can print secrets from real `.env`.
+- Docker images must exclude `.env`, `.claude/`, `local/`, and workspace state.
+- This repo is PERSONAL mode despite its path.
+
+## Git
+
+- No remote git actions unless explicitly requested.
+- Do not revert user changes.
+- File deletions require explicit user request.
+- Commits are optional in PERSONAL mode unless requested or preserving a stable milestone.
+
+## Updates
+
+Keep updates concise:
+
+- `Done`: what changed or was verified.
+- `Next`: immediate next action or blocker.

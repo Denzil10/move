@@ -1,0 +1,16 @@
+.env
+.claude/
+.venv/
+local/
+agent_workspace/
+server.log
+debug-*.log
+.coverage
+.pytest_cache/
+.ruff_cache/
+.serena/
+.smoke-results/
+llama_cache/
+__pycache__/
+*.pyc
+.git/

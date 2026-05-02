@@ -1,0 +1,14 @@
+FROM ghcr.io/astral-sh/uv:python3.14-bookworm-slim
+
+WORKDIR /app
+
+COPY pyproject.toml uv.lock ./
+RUN uv sync --frozen --no-dev
+
+COPY . .
+
+ENV ANTHROPIC_BASE_URL=http://proxy:8082
+ENV ANTHROPIC_AUTH_TOKEN=freecc
+ENV AUTOPILOT_MODEL=sonnet
+
+CMD ["uv", "run", "python", "scripts/autopilot_loop.py"]

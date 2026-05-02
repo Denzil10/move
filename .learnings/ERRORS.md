@@ -4,6 +4,64 @@ Command failures and integration errors.
 
 ---
 
+## [ERR-20260502-005] autopilot_loop_smoke
+
+**Logged**: 2026-05-02T21:05:00+05:30
+**Priority**: medium
+**Status**: fixed
+**Area**: infra
+
+### Summary
+The autopilot loop assumed JSON responses, but the local proxy can return SSE-style text for successful message calls.
+
+### Error
+```text
+ERROR: Expecting value: line 1 column 1 (char 0)
+```
+
+### Context
+- Command/operation attempted: `python scripts/autopilot_loop.py --once`
+- The proxy returned HTTP 200, but the client tried `response.json()` unconditionally.
+- Fixed by parsing both Anthropic JSON content blocks and SSE `text_delta` events.
+
+### Suggested Fix
+Keep response parser coverage for JSON, SSE, and empty-body success responses.
+
+### Metadata
+- Reproducible: yes
+- Related Files: scripts/autopilot_loop.py, tests/test_autopilot_loop.py
+
+---
+
+## [ERR-20260502-004] docker_compose_config
+
+**Logged**: 2026-05-02T21:01:18+05:30
+**Priority**: high
+**Status**: pending
+**Area**: config
+
+### Summary
+`docker compose config` expands env files and can print secret values.
+
+### Error
+```text
+Compose config rendered environment variables from the local env file, including provider credentials. Values are redacted from this log entry.
+```
+
+### Context
+- Command/operation attempted: validate `docker-compose.autopilot.yml`
+- Environment details: project uses ignored `.env` for provider credentials
+- Avoid repeating compose config output when `env_file` points at secret-bearing files.
+
+### Suggested Fix
+Use syntax-only review, redacted env files, or a temporary example env file for compose validation.
+
+### Metadata
+- Reproducible: yes
+- Related Files: docker-compose.autopilot.yml
+
+---
+
 ## [ERR-20260502-002] zsh-status-variable
 
 **Logged**: 2026-05-02T20:00:00+05:30
