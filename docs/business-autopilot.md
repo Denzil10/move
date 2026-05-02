@@ -1,12 +1,12 @@
-# Move Dragon Business Autopilot
+# Move Pet Business Autopilot
 
 ## Product
 
-Move Dragon is a lightweight desktop companion for people who sit too long during gaming, coding, work, or scrolling. After a long inactive session, a small dragon appears disturbed. When the user moves, it gets happy, floats with them, disappears after 3 seconds, and shows a victory toast with estimated calories burned.
+Move Pet is a lightweight desktop companion for people who sit too long during gaming, coding, work, or scrolling. After a long inactive session, a small dragon appears disturbed. When the user moves, it gets happy, floats with them, disappears after 3 seconds, and shows a victory toast with estimated calories burned.
 
 ## Wedge
 
-Existing break apps optimize reminders. Desktop pet apps optimize charm. Move Dragon should win by combining:
+Existing break apps optimize reminders. Desktop pet apps optimize charm. Move Pet should win by combining:
 
 - Cute, visible emotional feedback instead of generic alerts.
 - Local movement verification instead of "click to dismiss".

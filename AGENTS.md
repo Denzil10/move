@@ -8,7 +8,7 @@ Workflow: explore current state, implement the smallest useful improvement, veri
 
 ## Product
 
-Build and run Move Dragon on autopilot: a lightweight desktop companion that motivates people to move during gaming, work, coding, and social media.
+Build and run Move Pet on autopilot: a lightweight desktop companion that motivates people to move during gaming, work, coding, and social media.
 
 Core behavior:
 
