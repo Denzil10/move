@@ -5,3 +5,11 @@
 - [x] Install dependencies and configure required environment files without inventing missing credentials.
 - [x] Run the provided verification path and capture any setup blockers.
 - [x] Commit the completed setup in small focused commits.
+
+# Provider Research Plan
+
+- [ ] Research current non-OpenRouter, non-Gemini providers compatible with this proxy and identify the best 3 options.
+- [ ] Research current high-capability models and shortlist the best 5 Claude Opus-class candidates that can work through allowed providers.
+- [ ] Determine which allowed provider offers a free API-key path from the supplied guides.
+- [ ] Check other personal projects for an existing provider API key without exposing secret values.
+- [ ] Configure this project to the best available free provider/model, then verify startup and document any remaining blocker.
