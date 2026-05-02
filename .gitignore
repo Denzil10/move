@@ -1,1 +1,15 @@
+__pycache__
 local/
+.claude
+.cursor
+.pytest_cache
+.ruff_cache
+.serena
+.venv
+agent_workspace
+.env
+server.log
+debug-*.log
+.coverage
+llama_cache
+.smoke-results
