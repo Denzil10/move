@@ -126,6 +126,7 @@ class TestTitleGenerationRequest:
         req = MagicMock(spec=MessagesRequest)
         req.system = self._title_gen_system()
         req.tools = None
+        req.messages = [MagicMock(role="user")]
 
         assert is_title_generation_request(req) is True
 
@@ -134,6 +135,7 @@ class TestTitleGenerationRequest:
         req = MagicMock(spec=MessagesRequest)
         req.system = self._title_gen_system()
         req.tools = [MagicMock()]
+        req.messages = [MagicMock(role="user")]
 
         assert is_title_generation_request(req) is False
 
@@ -142,6 +144,7 @@ class TestTitleGenerationRequest:
         req = MagicMock(spec=MessagesRequest)
         req.system = None
         req.tools = None
+        req.messages = [MagicMock(role="user")]
 
         assert is_title_generation_request(req) is False
 
@@ -152,6 +155,7 @@ class TestTitleGenerationRequest:
         req = MagicMock(spec=MessagesRequest)
         req.system = [block]
         req.tools = None
+        req.messages = [MagicMock(role="user")]
 
         assert is_title_generation_request(req) is False
 
@@ -162,6 +166,59 @@ class TestTitleGenerationRequest:
         req = MagicMock(spec=MessagesRequest)
         req.system = [block]
         req.tools = None
+        req.messages = [MagicMock(role="user")]
+
+        assert is_title_generation_request(req) is True
+
+    def test_title_generation_this_session_variant(self):
+        """Matches "this session" instead of "coding session"."""
+        block = MagicMock()
+        block.text = 'Return JSON with a single "title" field for this session.'
+        req = MagicMock(spec=MessagesRequest)
+        req.system = [block]
+        req.tools = None
+        req.messages = [MagicMock(role="user")]
+
+        assert is_title_generation_request(req) is True
+
+    def test_title_generation_not_detected_multiple_messages(self):
+        """Not detected when there are multiple messages (docstring requirement)."""
+        req = MagicMock(spec=MessagesRequest)
+        req.system = self._title_gen_system()
+        req.tools = None
+        req.messages = [MagicMock(role="user"), MagicMock(role="assistant")]
+
+        assert is_title_generation_request(req) is False
+
+    def test_title_generation_not_detected_wrong_role(self):
+        """Not detected when the single message is not from user."""
+        req = MagicMock(spec=MessagesRequest)
+        req.system = self._title_gen_system()
+        req.tools = None
+        req.messages = [MagicMock(role="assistant")]
+
+        assert is_title_generation_request(req) is False
+
+    def test_title_generation_empty_messages(self):
+        """Not detected when messages are empty."""
+        req = MagicMock(spec=MessagesRequest)
+        req.system = self._title_gen_system()
+        req.tools = None
+        req.messages = []
+
+        assert is_title_generation_request(req) is False
+
+    def test_title_generation_mixed_system_content(self):
+        """Works when system prompt is a list of blocks including non-text."""
+        text_block = MagicMock()
+        text_block.text = "Generate a sentence-case title."
+        other_block = MagicMock()
+        del other_block.text  # Simulate non-text block
+
+        req = MagicMock(spec=MessagesRequest)
+        req.system = [text_block, other_block]
+        req.tools = None
+        req.messages = [MagicMock(role="user")]
 
         assert is_title_generation_request(req) is True
 

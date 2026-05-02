@@ -35,8 +35,14 @@ def is_title_generation_request(request_data: MessagesRequest) -> bool:
     Matches Claude Code session title prompts (sentence-case title, JSON
     \"title\" field, etc.).
     """
-    if not request_data.system or request_data.tools:
+    if (
+        not request_data.system
+        or request_data.tools
+        or len(request_data.messages) != 1
+        or request_data.messages[0].role != "user"
+    ):
         return False
+
     system_text = extract_text_from_content(request_data.system).lower()
     if "title" not in system_text:
         return False
