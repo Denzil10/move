@@ -14,6 +14,8 @@ Use Claude Code CLI, VS Code, JetBrains ACP, or chat bots through your own Anthr
 
 Free Claude Code routes Anthropic Messages API traffic from Claude Code to NVIDIA NIM, OpenRouter, DeepSeek, LM Studio, llama.cpp, or Ollama. It keeps Claude Code's client-side protocol stable while letting you choose free, paid, or local models.
 
+Local note: this workspace is configured for NVIDIA NIM with `deepseek-ai/deepseek-v4-flash` in the ignored `.env`. See `docs/local-setup.md` for the provider/model research and NVIDIA compatibility flags.
+
 [Quick Start](#quick-start) · [Providers](#choose-a-provider) · [Clients](#connect-claude-code) · [Troubleshooting](#troubleshooting) · [Development](#development)
 
 </div>

@@ -83,9 +83,20 @@ class TestBuildRequestBody:
         assert "include_stop_str_in_output" not in body.get("extra_body", {})
 
     def test_parallel_tool_calls_included(self, req):
+        req.tools = [
+            SimpleNamespace(
+                name="echo",
+                description="",
+                input_schema={"type": "object", "properties": {}},
+            )
+        ]
         nim = NimSettings(parallel_tool_calls=False)
         body = build_request_body(req, nim, thinking_enabled=True)
         assert body["parallel_tool_calls"] is False
+
+    def test_parallel_tool_calls_omitted_without_tools(self, req):
+        body = build_request_body(req, NimSettings(), thinking_enabled=True)
+        assert "parallel_tool_calls" not in body
 
     def test_tool_schema_boolean_subschemas_are_removed_without_mutating_request(
         self, req

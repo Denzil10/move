@@ -158,6 +158,9 @@ class Settings(BaseSettings):
 
     # ==================== Per-Provider Proxy ====================
     nvidia_nim_proxy: str = Field(default="", validation_alias="NVIDIA_NIM_PROXY")
+    nvidia_nim_force_non_streaming: bool = Field(
+        default=False, validation_alias="NVIDIA_NIM_FORCE_NON_STREAMING"
+    )
     open_router_proxy: str = Field(default="", validation_alias="OPENROUTER_PROXY")
     lmstudio_proxy: str = Field(default="", validation_alias="LMSTUDIO_PROXY")
     llamacpp_proxy: str = Field(default="", validation_alias="LLAMACPP_PROXY")

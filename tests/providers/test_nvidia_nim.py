@@ -1,4 +1,5 @@
 import json
+from types import SimpleNamespace
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import openai
@@ -238,6 +239,43 @@ async def test_stream_response_text(nim_provider):
                             text_content += data["delta"]["text"]
 
         assert "Hello World" in text_content
+
+
+@pytest.mark.asyncio
+async def test_force_non_streaming_wraps_completion_as_sse(provider_config):
+    """NIM can synthesize Anthropic SSE from non-streaming OpenAI completions."""
+    provider = NvidiaNimProvider(
+        provider_config.model_copy(update={"force_non_streaming": True}),
+        nim_settings=NimSettings(),
+    )
+    req = MockRequest()
+
+    response = SimpleNamespace(
+        choices=[
+            SimpleNamespace(
+                message=SimpleNamespace(
+                    content="proxy ok",
+                    reasoning_content=None,
+                    tool_calls=None,
+                ),
+                finish_reason="stop",
+            )
+        ],
+        usage=SimpleNamespace(completion_tokens=3, prompt_tokens=2),
+    )
+
+    with patch.object(
+        provider._client.chat.completions, "create", new_callable=AsyncMock
+    ) as mock_create:
+        mock_create.return_value = response
+
+        events = [e async for e in provider.stream_response(req)]
+
+    _, kwargs = mock_create.await_args
+    assert kwargs["stream"] is False
+    event_text = "".join(events)
+    assert "proxy ok" in event_text
+    assert "message_stop" in event_text
 
 
 @pytest.mark.asyncio

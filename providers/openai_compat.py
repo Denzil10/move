@@ -9,6 +9,7 @@ import json
 import uuid
 from abc import abstractmethod
 from collections.abc import AsyncIterator, Iterator
+from types import SimpleNamespace
 from typing import Any
 
 import httpx
@@ -54,6 +55,22 @@ def _iter_heuristic_tool_use_sse(
         json.dumps(tool_use["input"]),
     )
     yield sse.content_block_stop(block_idx)
+
+
+class _SingleChunkAsyncIterator:
+    """Async iterator wrapper for synthesized one-shot OpenAI chunks."""
+
+    def __init__(self, chunks: list[Any]):
+        self._chunks = iter(chunks)
+
+    def __aiter__(self):
+        return self
+
+    async def __anext__(self):
+        try:
+            return next(self._chunks)
+        except StopIteration as exc:
+            raise StopAsyncIteration from exc
 
 
 class OpenAIChatTransport(BaseProvider):
@@ -128,8 +145,58 @@ class OpenAIChatTransport(BaseProvider):
         """Return a modified request body for one retry, or None."""
         return None
 
+    def _non_stream_response_to_chunk(self, response: Any) -> Any:
+        """Convert one OpenAI chat completion into a stream-like chunk."""
+        choices = []
+        for choice in getattr(response, "choices", []) or []:
+            message = getattr(choice, "message", None)
+            content = getattr(message, "content", None)
+            if isinstance(content, list):
+                content = "".join(
+                    part.get("text", "") if isinstance(part, dict) else str(part)
+                    for part in content
+                )
+            reasoning = getattr(message, "reasoning_content", None)
+            if reasoning is None:
+                reasoning = getattr(message, "reasoning", None)
+            choices.append(
+                SimpleNamespace(
+                    delta=SimpleNamespace(
+                        content=content,
+                        reasoning_content=reasoning,
+                        tool_calls=getattr(message, "tool_calls", None),
+                    ),
+                    finish_reason=getattr(choice, "finish_reason", None),
+                )
+            )
+        return SimpleNamespace(choices=choices, usage=getattr(response, "usage", None))
+
+    async def _create_non_stream_as_stream(self, body: dict) -> tuple[Any, dict]:
+        """Create a non-streaming completion and wrap it as a one-chunk stream."""
+        try:
+            response = await self._global_rate_limiter.execute_with_retry(
+                self._client.chat.completions.create, **body, stream=False
+            )
+            return _SingleChunkAsyncIterator(
+                [self._non_stream_response_to_chunk(response)]
+            ), body
+        except Exception as error:
+            retry_body = self._get_retry_request_body(error, body)
+            if retry_body is None:
+                raise
+
+            response = await self._global_rate_limiter.execute_with_retry(
+                self._client.chat.completions.create, **retry_body, stream=False
+            )
+            return _SingleChunkAsyncIterator(
+                [self._non_stream_response_to_chunk(response)]
+            ), retry_body
+
     async def _create_stream(self, body: dict) -> tuple[Any, dict]:
         """Create a streaming chat completion, optionally retrying once."""
+        if self._config.force_non_streaming:
+            return await self._create_non_stream_as_stream(body)
+
         try:
             stream = await self._global_rate_limiter.execute_with_retry(
                 self._client.chat.completions.create, **body, stream=True

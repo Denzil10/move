@@ -135,6 +135,10 @@ def build_provider_config(
         proxy=proxy,
         log_raw_sse_events=settings.log_raw_sse_events,
         log_api_error_tracebacks=settings.log_api_error_tracebacks,
+        force_non_streaming=(
+            descriptor.provider_id == "nvidia_nim"
+            and settings.nvidia_nim_force_non_streaming
+        ),
     )
 
 
