@@ -30,7 +30,9 @@ def _build_prompt() -> str:
         ROOT / "tasks" / "autopilot.md",
         ROOT / "docs" / "local-setup.md",
     ]
-    sections = [f"## {path.relative_to(ROOT)}\n\n{_read(path)}" for path in context_files]
+    sections = [
+        f"## {path.relative_to(ROOT)}\n\n{_read(path)}" for path in context_files
+    ]
     return "\n\n".join(sections)
 
 
@@ -91,7 +93,9 @@ def _response_text(response: httpx.Response) -> str:
 
 def _anthropic_json_text(data: dict[str, Any]) -> str:
     blocks = data.get("content", [])
-    return "\n".join(block.get("text", "") for block in blocks if block.get("type") == "text")
+    return "\n".join(
+        block.get("text", "") for block in blocks if block.get("type") == "text"
+    )
 
 
 def _anthropic_event_text(event: dict[str, Any]) -> str:
@@ -118,15 +122,23 @@ async def _main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--interval-seconds", type=int, default=300)
     parser.add_argument("--once", action="store_true")
-    parser.add_argument("--base-url", default=os.getenv("ANTHROPIC_BASE_URL", "http://127.0.0.1:8082"))
-    parser.add_argument("--auth-token", default=os.getenv("ANTHROPIC_AUTH_TOKEN", "freecc"))
+    parser.add_argument(
+        "--base-url", default=os.getenv("ANTHROPIC_BASE_URL", "http://127.0.0.1:8082")
+    )
+    parser.add_argument(
+        "--auth-token", default=os.getenv("ANTHROPIC_AUTH_TOKEN", "freecc")
+    )
     parser.add_argument("--model", default=os.getenv("AUTOPILOT_MODEL", "sonnet"))
-    parser.add_argument("--max-tokens", type=int, default=int(os.getenv("AUTOPILOT_MAX_TOKENS", "1600")))
+    parser.add_argument(
+        "--max-tokens", type=int, default=int(os.getenv("AUTOPILOT_MAX_TOKENS", "1600"))
+    )
     parser.add_argument("--state-dir", type=Path, default=DEFAULT_STATE_DIR)
     args = parser.parse_args()
 
     timeout = httpx.Timeout(connect=10.0, read=260.0, write=30.0, pool=10.0)
-    async with httpx.AsyncClient(base_url=args.base_url.rstrip("/"), timeout=timeout) as client:
+    async with httpx.AsyncClient(
+        base_url=args.base_url.rstrip("/"), timeout=timeout
+    ) as client:
         while True:
             try:
                 result = await _run_once(client, args)

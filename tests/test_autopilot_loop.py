@@ -18,9 +18,9 @@ def test_response_text_reads_sse_text_deltas() -> None:
         200,
         headers={"content-type": "text/event-stream"},
         text=(
-            'event: content_block_delta\n'
+            "event: content_block_delta\n"
             'data: {"type":"content_block_delta","delta":{"type":"text_delta","text":"cycle "}}\n\n'
-            'event: content_block_delta\n'
+            "event: content_block_delta\n"
             'data: {"type":"content_block_delta","delta":{"type":"text_delta","text":"ok"}}\n\n'
             "data: [DONE]\n"
         ),
