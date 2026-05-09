@@ -271,6 +271,7 @@ async def test_force_non_streaming_wraps_completion_as_sse(provider_config):
 
         events = [e async for e in provider.stream_response(req)]
 
+    assert mock_create.await_args is not None
     _, kwargs = mock_create.await_args
     assert kwargs["stream"] is False
     event_text = "".join(events)
