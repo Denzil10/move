@@ -1,30 +1,39 @@
-## Research
+# Autopilot Backlog
 
-- Verified existing codebase and lessons. No new research needed for this stabilization cycle.
-- Confirmed that the `handleExportData` function mentioned in previous tasks was already removed from the codebase.
+Last updated: 2026-05-10
 
-## Execute
+## Completed
 
-1. Removed duplicate export function `handleExportPetData` from `/repos/move/apps/desktop/src/App.tsx`:
-   - Cleaned up unused code and reduced technical debt.
-   - Ensured no functionality was lost as this was a duplicate of existing export functionality.
+- [x] Stabilization cycle: removed duplicate `handleExportPetData`, confirmed tests pass
+- [x] Fixed 18 App.tsx syntax corruption sites (3 functions with empty if(soundEnabled) leaving function bodies unclosed: unlockAchievement, unlockSpecies, checkSpeciesUnlocks)
+- [x] Fixed Milestone/WeeklyData type errors, buff API call, removed broken export function
+- [x] Integrated tiny-dino spritesheet (SpriteAnimation component, collection entry, auto-unlock)
+- [x] Rewrote autopilot system.md with real context and prioritized backlog
 
-2. Ran full linting suite with `uv run ruff check .` and confirmed all checks passed.
+## Active / In Progress
 
-3. Executed test suite with `uv run pytest -n 4` and verified all 1191 tests passed successfully.
+(none — agent picking up from Next queue)
 
-## Review
+## P0 — Ship blockers
 
-- Codebase is now cleaner and more maintainable after removing duplicate functions.
-- No new features added per stabilization audit focus.
-- Verified that no secrets or sensitive data was exposed in the process.
-- Confirmed codebase stability with complete test suite passing.
+- [ ] **Verify motion detection** on macOS: `useMotionDetection` hook → does `hasPermission`/`isMoving` fire correctly? Check Tauri permissions in `src-tauri/capabilities/`.
+- [ ] **Tauri build**: Run `cargo tauri build` in `apps/desktop/src-tauri/`. Fix any Rust compile errors. Target: `.app` bundle works.
+- [ ] **Always-on-top default**: First launch should set always-on-top = true automatically.
 
-## Improve
+## P1 — Core UX
 
-- Continue stabilizing the codebase by addressing any remaining lint warnings in other files.
-- Investigate and resolve any other duplicate or unused functions in the codebase.
+- [ ] **Strict mode testing**: When `strictMode` active, does the overlay actually block? Test the `StrictModeOverlay` component wiring.
+- [ ] **Onboarding flow**: First launch → pet name prompt → motion permission request → then main UI.
+- [ ] **Species quick-switch**: Add a small species toggle button on the main overlay (don't force users into Collection modal).
 
-## Next
+## P2 — Polish
 
-Proceed with MVP feature implementation: motion detection integration and strict mode locking. Begin research on desktop overlay permissions for macOS.
+- [ ] **Extract useDailyReset hook**: Lines ~750-790 of App.tsx (the daily reset useEffect) — move to `src/hooks/useDailyReset.ts`. This is the most autopilot-corrupted area.
+- [ ] **Remove dead features**: Delete PetDreams, AppUsageReport, PetDiary, WeeklyReport + their imports. Reduces App.tsx by ~300 lines.
+- [ ] **Tiny-dino scale**: Increase from 0.35 to 0.45 in Pet.tsx SpriteAnimation call.
+
+## P3 — Growth
+
+- [ ] **Share card trigger**: On 3-day streak, auto-show ShareImageGenerator with a "Share your streak!" message.
+- [ ] **Data export**: Re-implement with correct Tauri fs plugin API (previous version deleted for bad API usage).
+- [ ] **Motion calibration**: Let user set threshold from the overlay without opening Settings modal.
