@@ -229,6 +229,23 @@ html, body, #root {
   z-index: 10;
 }
 
+/* Debug indicator */
+.debug-dot {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  width: 7px;
+  height: 7px;
+  background: #f59e0b;
+  border-radius: 50%;
+  animation: debug-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes debug-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: 0.4; transform: scale(0.7); }
+}
+
 @keyframes float-up {
   0%   { opacity: 1; transform: translateY(0) scale(1) rotate(0deg); }
   70%  { opacity: 0.9; }

@@ -1,7 +1,7 @@
 use tauri::{Manager, WebviewWindow};
 use cpal::traits::{DeviceTrait, HostTrait, StreamTrait};
 use rodio::{OutputStream, OutputStreamHandle, Sink, source::SineWave, Source};
-use std::sync::{Arc, Mutex, OnceLock};
+use std::sync::{Mutex, OnceLock};
 use std::time::Duration;
 
 static PEAK_AMPLITUDE: Mutex<f32> = Mutex::new(0.0);
