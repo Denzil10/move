@@ -106,6 +106,18 @@
       color: #344054;
     }
 
+    .chip.live {
+      background: #e8f9ef;
+      border-color: #9ddcb9;
+      color: #1a6e46;
+    }
+
+    .chip.warn {
+      background: #fff8e6;
+      border-color: #f4d78a;
+      color: #7a5100;
+    }
+
     .preview {
       position: relative;
       min-height: 300px;
@@ -273,6 +285,8 @@
       line-height: 1.45;
     }
 
+    .card p + p { margin-top: 8px; }
+
     .num {
       display: inline-grid;
       place-items: center;
@@ -287,10 +301,10 @@
     }
 
     .accent-green { border-top: 5px solid var(--green); }
-    .accent-blue { border-top: 5px solid var(--blue); }
-    .accent-gold { border-top: 5px solid var(--gold); }
+    .accent-blue  { border-top: 5px solid var(--blue); }
+    .accent-gold  { border-top: 5px solid var(--gold); }
     .accent-coral { border-top: 5px solid var(--coral); }
-    .accent-lav { border-top: 5px solid var(--lav); }
+    .accent-lav   { border-top: 5px solid var(--lav); }
 
     .progress {
       display: grid;
@@ -320,11 +334,34 @@
       background: linear-gradient(90deg, var(--green), var(--blue));
     }
 
-    ol {
+    .status-pill {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+    }
+    .pill-done   { background: #e8f9ef; color: #1a6e46; }
+    .pill-active { background: #e8f0ff; color: #1a3a8f; }
+    .pill-next   { background: #fff8e6; color: #7a5100; }
+    .pill-risk   { background: #fff0ee; color: #8b2514; }
+
+    .tag-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+
+    ol, ul {
       margin: 0;
       padding-left: 20px;
       color: var(--muted);
       line-height: 1.7;
+    }
+
+    code {
+      background: #f1f5fa;
+      border: 1px solid var(--line);
+      border-radius: 5px;
+      padding: 1px 5px;
+      font-size: 12px;
     }
 
     footer {
@@ -345,14 +382,8 @@
       .grid.three {
         grid-template-columns: 1fr;
       }
-
-      .section-head {
-        display: block;
-      }
-
-      .section-head p {
-        margin-top: 8px;
-      }
+      .section-head { display: block; }
+      .section-head p { margin-top: 8px; }
     }
 
     @media (max-width: 560px) {
@@ -368,16 +399,18 @@
     <header>
       <div class="hero">
         <div>
-          <p class="eyebrow">Move Pet System</p>
+          <p class="eyebrow">Move Pet — System Snapshot · 2026-05-10</p>
           <h1>Regular movement, made hard to ignore.</h1>
-          <p class="summary">A tiny desktop pet appears at intervals, gives one fun movement prompt, verifies local motion, celebrates, and gets out of the way.</p>
+          <p class="summary">A tiny desktop pet appears when you've been still too long, gives one movement prompt, scores motion locally, celebrates, and gets out of the way. Tauri + React, privacy-first, no cloud required.</p>
         </div>
         <div class="chips">
-          <span class="chip">Tauri + React</span>
-          <span class="chip">Local camera scoring</span>
-          <span class="chip">Rich bundled pet library</span>
-          <span class="chip">No user-generated pets</span>
-          <span class="chip">Strict mode later</span>
+          <span class="chip">Tauri v2 + React 18</span>
+          <span class="chip live">Build ✅ passing</span>
+          <span class="chip live">Tiny Dino spritesheet live</span>
+          <span class="chip">Local motion detection</span>
+          <span class="chip">Bundled pet library</span>
+          <span class="chip warn">Tauri .app bundle unverified</span>
+          <span class="chip">Strict mode opt-in</span>
         </div>
       </div>
 
@@ -392,65 +425,172 @@
       </aside>
     </header>
 
+    <!-- ─── SECTION 1: Architecture ─────────────────────────────────────────── -->
     <section aria-labelledby="architecture">
       <div class="section-head">
-        <h2 id="architecture">Architecture And Logic</h2>
-        <p>One compact desktop loop: interval, prompt, pet animation, local motion score, reward.</p>
+        <h2 id="architecture">Architecture &amp; Logic</h2>
+        <p>One compact desktop loop: inactivity detection → pet gets disturbed → movement prompt → local motion scoring → reward. All computation stays on-device.</p>
       </div>
       <div class="grid">
-        <article class="card accent-green"><span class="num">1</span><h3>Prompt Timer</h3><p>Configurable intervals choose short movement prompts: march, stretch, squats, shoulder rolls, water walk.</p></article>
-        <article class="card accent-blue"><span class="num">2</span><h3>Pet Overlay</h3><p>Transparent always-on-top Tauri window shows a bundled Hatch/Codex-style pet pack.</p></article>
-        <article class="card accent-gold"><span class="num">3</span><h3>Motion Check</h3><p>Browser webcam frame-diff scores movement locally; frames are discarded immediately.</p></article>
-        <article class="card accent-coral"><span class="num">4</span><h3>Reward Loop</h3><p>Three seconds of movement makes the pet happy; full target shows streak, calories, and victory.</p></article>
+        <article class="card accent-green">
+          <span class="num">1</span>
+          <h3>Inactivity Detection</h3>
+          <p><code>useInactivity</code> tracks idle time. When threshold is exceeded, pet state transitions to <strong>disturbed</strong>. Configurable timeout (default 30 min). Respects quiet hours and productivity mode.</p>
+        </article>
+        <article class="card accent-blue">
+          <span class="num">2</span>
+          <h3>Pet Overlay</h3>
+          <p>Transparent always-on-top Tauri window. Renders CSS-blob dragon (<em>emerald_dragon</em>) or animated spritesheet pet (<em>tiny_dino</em> — 8×9 grid, 192×208px cells). State-mapped frame animation via <code>SpriteAnimation.tsx</code>.</p>
+          <div class="tag-row">
+            <span class="status-pill pill-done">spritesheet live</span>
+            <span class="status-pill pill-active">8 pet states</span>
+          </div>
+        </article>
+        <article class="card accent-gold">
+          <span class="num">3</span>
+          <h3>Motion Detection</h3>
+          <p>Tauri device motion API via <code>useMotionDetection</code> hook. Scores movement with configurable threshold. macOS permission grant required — <strong>not yet verified on device</strong>. Frames never leave the app.</p>
+          <div class="tag-row">
+            <span class="status-pill pill-risk">needs device test</span>
+          </div>
+        </article>
+        <article class="card accent-coral">
+          <span class="num">4</span>
+          <h3>Reward Loop</h3>
+          <p>Sufficient motion → pet becomes <strong>happy / floating</strong>. Achievements unlock, XP + coins awarded, streak extended, quests progress. Quest system, daily recap, and share card all wired in.</p>
+        </article>
+      </div>
+
+      <div class="grid" style="margin-top:12px; grid-template-columns: repeat(4,1fr);">
+        <article class="card accent-lav">
+          <h3>Pet States</h3>
+          <p><code>idle · disturbed · happy · floating · thinking · sleeping · chatting · training</code></p>
+          <p>Each maps to a spritesheet row (row 0–7) and CSS animation class. Sound cues trigger on state change.</p>
+        </article>
+        <article class="card accent-green">
+          <h3>Species System</h3>
+          <p>15+ collectable species in <code>collection.ts</code>. Spritesheet species carry <code>SpritesheetMeta</code> (src, cols, cellWidth, cellHeight, stateRows). Tiny Dino auto-unlocked at start.</p>
+        </article>
+        <article class="card accent-blue">
+          <h3>Quest &amp; XP</h3>
+          <p>Daily quests (walk, sleep, shopping, hydration targets). XP = calories burned × multipliers. Level-gated species unlocks, personality unlocks at level 5+.</p>
+        </article>
+        <article class="card accent-gold">
+          <h3>Autopilot Guard</h3>
+          <p>Known corruption pattern: autopilot inserts empty <code>if (soundEnabled) {`{}`}</code> blocks, leaving function bodies unclosed. Rule: always use <code>if (soundEnabled) playX();</code> single-line form and verify build passes.</p>
+          <div class="tag-row"><span class="status-pill pill-risk">fragile file</span></div>
+        </article>
       </div>
     </section>
 
+    <!-- ─── SECTION 2: Autopilot ─────────────────────────────────────────────── -->
     <section aria-labelledby="autopilot">
       <div class="section-head">
         <h2 id="autopilot">Autopilot System</h2>
-        <p>The business loop keeps shipping, research, docs, packaging, and launch assets moving from the shared agent service.</p>
+        <p>Gemini CLI agent via shared agent service — runs every 5 minutes, picks one backlog item, verifies build, commits, updates backlog.</p>
       </div>
       <div class="grid three">
-        <article class="card accent-blue"><h3>Runtime</h3><p>Shared agent service at <code>/Users/denzil/Projects/personal/self/agent</code>, project config under <code>projects/move</code>.</p></article>
-        <article class="card accent-green"><h3>Cadence</h3><p>Runs every 5 minutes when active: research, execute, review, improve, then update backlog/docs.</p></article>
-        <article class="card accent-lav"><h3>Guardrails</h3><p>Use free-tier tools first. Ask only for pricing, public launch, paid services, credentials, or risky distribution calls.</p></article>
+        <article class="card accent-blue">
+          <h3>Runtime</h3>
+          <p>Shared agent service at <code>/Users/denzil/Projects/personal/self/agent</code>. Project config under <code>projects/move</code>. Harness: Gemini CLI. Provider: <code>ai-service</code> with auto model.</p>
+          <p>Output cycle written to <code>tasks/autopilot.md</code> as a living prioritized backlog.</p>
+        </article>
+        <article class="card accent-green">
+          <h3>Cadence &amp; Loop</h3>
+          <p>Every 5 minutes when active. One cycle = <strong>Research → Execute → Review → Next</strong>. One task per cycle — no multi-P0 attempts in a single run.</p>
+          <p>System prompt lives at <code>autopilot/prompts/system.md</code> — last rewritten 2026-05-10 with real codebase context.</p>
+        </article>
+        <article class="card accent-lav">
+          <h3>Guardrails</h3>
+          <ul>
+            <li>Run <code>npm run build</code> before every commit — must pass.</li>
+            <li>Never add empty <code>if (soundEnabled) {}</code> blocks — use single-line form.</li>
+            <li>Surgical App.tsx edits only; no large rewrites.</li>
+            <li>No cloud commands without explicit approval.</li>
+            <li>No P1+ work until P0 (motion + Tauri build) is verified.</li>
+          </ul>
+        </article>
+      </div>
+
+      <div class="grid three" style="margin-top:12px;">
+        <article class="card accent-coral">
+          <h3>P0 — Ship blockers</h3>
+          <ol>
+            <li>Verify <code>useMotionDetection</code> on macOS — does <code>isMoving</code> fire?</li>
+            <li>Run <code>cargo tauri build</code> — produce working <code>.app</code> bundle.</li>
+            <li>Always-on-top = true by default on first launch.</li>
+          </ol>
+        </article>
+        <article class="card accent-gold">
+          <h3>P1 — Core UX</h3>
+          <ol>
+            <li>Test <code>StrictModeOverlay</code> actually blocks the screen.</li>
+            <li>Onboarding: name prompt → motion permission → main UI.</li>
+            <li>Species quick-switch button on main overlay (not buried in Collection modal).</li>
+          </ol>
+        </article>
+        <article class="card accent-lav">
+          <h3>P2 / P3 — Polish &amp; Growth</h3>
+          <ol>
+            <li>Extract <code>useDailyReset</code> hook from App.tsx lines ~750.</li>
+            <li>Delete PetDreams, AppUsageReport, PetDiary, WeeklyReport (~300 lines saved).</li>
+            <li>Scale tiny-dino sprite from 0.35× to 0.45×.</li>
+            <li>Share card trigger on 3-day streak.</li>
+            <li>Re-implement data export with correct Tauri fs API.</li>
+          </ol>
+        </article>
       </div>
     </section>
 
+    <!-- ─── SECTION 3: Progress ───────────────────────────────────────────────── -->
     <section aria-labelledby="progress">
       <div class="section-head">
-        <h2 id="progress">Progress And Next</h2>
-        <p>Current direction: compact product, richer bundled pet library, rotating movement prompts, no user pet generation this phase.</p>
+        <h2 id="progress">Progress &amp; Next</h2>
+        <p>Build is green. Spritesheet pet is live. Core loop works in dev. Tauri native bundle and device motion verification are the remaining ship blockers.</p>
       </div>
       <div class="grid three">
         <article class="card">
           <h3>Progress</h3>
           <div class="progress">
-            <div class="row"><span>Runtime</span><div class="bar"><span style="width:100%"></span></div><span>done</span></div>
-            <div class="row"><span>Prototype</span><div class="bar"><span style="width:88%"></span></div><span>strong</span></div>
-            <div class="row"><span>Motion Loop</span><div class="bar"><span style="width:78%"></span></div><span>MVP</span></div>
-            <div class="row"><span>Packaging</span><div class="bar"><span style="width:64%"></span></div><span>mixed</span></div>
-            <div class="row"><span>Pet Library</span><div class="bar"><span style="width:36%"></span></div><span>source</span></div>
+            <div class="row"><span>Build</span><div class="bar"><span style="width:100%"></span></div><span class="status-pill pill-done">✅ done</span></div>
+            <div class="row"><span>Core Loop</span><div class="bar"><span style="width:92%"></span></div><span>strong</span></div>
+            <div class="row"><span>Pet Visuals</span><div class="bar"><span style="width:80%"></span></div><span>good</span></div>
+            <div class="row"><span>Motion API</span><div class="bar"><span style="width:65%"></span></div><span class="status-pill pill-risk">unverified</span></div>
+            <div class="row"><span>Tauri Bundle</span><div class="bar"><span style="width:50%"></span></div><span class="status-pill pill-risk">unverified</span></div>
+            <div class="row"><span>Pet Library</span><div class="bar"><span style="width:60%"></span></div><span class="status-pill pill-done">1 spritesheet</span></div>
+            <div class="row"><span>Autopilot</span><div class="bar"><span style="width:85%"></span></div><span>calibrated</span></div>
           </div>
         </article>
+
         <article class="card">
-          <h3>Next Build Steps</h3>
-          <ol>
-            <li>Source the richest popular open Hatch/Codex-compatible pet library.</li>
-            <li>Bundle pet picker data without import/generation UI.</li>
-            <li>Implement rotating prompts tied to interval state.</li>
-            <li>Wire pet states to prompt, motion, happy, victory.</li>
-          </ol>
+          <h3>Completed This Session</h3>
+          <ul>
+            <li>Fixed 18 App.tsx syntax corruption sites — build now passes.</li>
+            <li>Integrated tiny-dino spritesheet (8×9, 192×208px, 9 animation rows).</li>
+            <li><code>SpriteAnimation.tsx</code> — JS frame cycling, state→row mapping.</li>
+            <li>Added <code>SpritesheetMeta</code> to species interface in <code>collection.ts</code>.</li>
+            <li>Rewrote autopilot system prompt with real context + guardrails.</li>
+            <li>Rebuilt <code>tasks/autopilot.md</code> as P0/P1/P2/P3 living backlog.</li>
+            <li>Logged autopilot corruption pattern to <code>.learnings/LEARNINGS.md</code>.</li>
+          </ul>
         </article>
+
         <article class="card">
           <h3>Definition Of Done</h3>
-          <p><strong>inactive -> prompt -> motion -> happy -> victory</strong></p>
-          <p>Verified install, dev run, build, and a manual full movement loop with local-only camera handling.</p>
+          <p><strong>inactive → disturbed → prompt → motion → happy → victory</strong></p>
+          <p>Ship criteria:</p>
+          <ul>
+            <li><code>npm run build</code> passes with zero errors.</li>
+            <li><code>cargo tauri build</code> produces a runnable <code>.app</code>.</li>
+            <li>Motion detection triggers <code>isMoving = true</code> on device.</li>
+            <li>Manual full movement loop verified end-to-end.</li>
+            <li>Pet overlay floats above other windows by default.</li>
+          </ul>
         </article>
       </div>
     </section>
 
-    <footer>Move Pet system snapshot. Three sections: architecture, autopilot, progress.</footer>
+    <footer>Move Pet system snapshot · 2026-05-10 · Three sections: architecture &amp; logic, autopilot system, progress &amp; next.</footer>
   </main>
 </body>
 </html>
