@@ -1,0 +1,197 @@
+.pet-needs-dashboard {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  padding: 16px;
+  margin: 16px 0;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.dashboard-header h4 {
+  margin: 0;
+  font-size: 1.1rem;
+  color: #fff;
+}
+
+.mood-badge {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.needs-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.need-item {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.need-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.9rem;
+  color: #ccc;
+}
+
+.need-value {
+  font-weight: bold;
+}
+
+.need-bar-container {
+  height: 8px;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+.need-bar-fill {
+  height: 100%;
+  transition: width 0.3s ease, background-color 0.3s ease;
+}
+
+.need-action-btn {
+  padding: 6px 0;
+  border-radius: 6px;
+  border: none;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+.need-action-btn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.need-action-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.need-action-btn.feed:hover:not(:disabled) {
+  background: #a6e3a1;
+  color: #11111b;
+}
+
+.need-action-btn.rest.active {
+  background: #89b4fa;
+  color: #11111b;
+  animation: pulse 2s infinite;
+}
+
+.resting-indicator {
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #89b4fa;
+}
+
+.zzz {
+  font-size: 1.2rem;
+  font-weight: bold;
+  animation: zzz-float 3s infinite ease-in-out;
+}
+
+.resting-indicator p {
+  margin: 0;
+  font-size: 0.85rem;
+  font-style: italic;
+}
+
+@keyframes pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.7; }
+  100% { opacity: 1; }
+}
+
+@keyframes zzz-float {
+  0% { transform: translateY(0) scale(1); opacity: 0.5; }
+  50% { transform: translateY(-5px) scale(1.1); opacity: 1; }
+  100% { transform: translateY(0) scale(1); opacity: 0.5; }
+}
+
+/* Dark mode specific adjustments */
+:global(.dark) .pet-needs-dashboard {
+  background: rgba(17, 17, 27, 0.4);
+}
+
+/* Light mode specific adjustments */
+:global(.light) .pet-needs-dashboard {
+  background: rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+:global(.light) .dashboard-header h4 {
+  color: #11111b;
+}
+
+:global(.light) .mood-badge {
+  background: rgba(0, 0, 0, 0.1);
+  color: #11111b;
+}
+
+:global(.light) .need-label {
+  color: #444;
+}
+
+:global(.light) .need-action-btn {
+  background: rgba(0, 0, 0, 0.1);
+  color: #11111b;
+}
+
+.sleep-schedule-status {
+  margin-top: 12px;
+  padding: 8px 12px;
+  background: rgba(137, 180, 250, 0.1);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid rgba(137, 180, 250, 0.2);
+}
+
+.schedule-icon {
+  font-size: 1rem;
+}
+
+.schedule-label {
+  font-size: 0.85rem;
+  color: #89b4fa;
+  font-weight: 500;
+}
+
+.need-action-btn.rest.auto-sleep {
+  background: rgba(137, 180, 250, 0.2);
+  color: #89b4fa;
+  cursor: help;
+}
+
+:global(.light) .sleep-schedule-status {
+  background: rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+:global(.light) .schedule-label {
+  color: #1e66f5;
+}

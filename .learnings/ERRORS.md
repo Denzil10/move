@@ -4,6 +4,64 @@ Command failures and integration errors.
 
 ---
 
+## [ERR-20260508-001] browser-use-cli
+
+**Logged**: 2026-05-08T12:14:11+05:30
+**Priority**: high
+**Status**: fixed
+**Area**: tooling
+
+### Summary
+`browser-use doctor` crashed on Homebrew Python 3.14 before diagnostics could run.
+
+### Error
+```text
+RuntimeError: There is no current event loop in thread 'MainThread'.
+```
+
+### Context
+- Command: `browser-use doctor`
+- Package: `browser-use==0.12.6`
+- Cause: synchronous CLI code called `asyncio.get_event_loop()` when Python 3.14 had no default loop in the main thread.
+
+### Suggested Fix
+Use a CLI helper that catches `RuntimeError`, creates a new event loop with `asyncio.new_event_loop()`, sets it with `asyncio.set_event_loop()`, and then runs the coroutine.
+
+### Metadata
+- Reproducible: yes
+- Related Files: `/opt/homebrew/lib/python3.14/site-packages/browser_use/skill_cli/main.py`
+
+---
+
+## [ERR-20260502-006] docker_autopilot_build
+
+**Logged**: 2026-05-02T23:20:00+05:30
+**Priority**: medium
+**Status**: fixed
+**Area**: infra
+
+### Summary
+Docker autopilot build failed because `uv sync` ran before package metadata files were copied.
+
+### Error
+```text
+OSError: Readme file does not exist: README.md
+```
+
+### Context
+- Command/operation attempted: `docker compose -f docker-compose.autopilot.yml build autopilot`
+- The Dockerfile copied only `pyproject.toml` and `uv.lock` before `uv sync`.
+- Hatchling validates `readme = "README.md"` during editable package build.
+
+### Suggested Fix
+Copy the project context before `uv sync`, relying on `.dockerignore` to keep secrets and local state out of the image.
+
+### Metadata
+- Reproducible: yes
+- Related Files: Dockerfile.autopilot, .dockerignore
+
+---
+
 ## [ERR-20260502-005] autopilot_loop_smoke
 
 **Logged**: 2026-05-02T21:05:00+05:30
@@ -144,5 +202,61 @@ Add a valid `nvapi-...` key to `NVIDIA_NIM_API_KEY` in `.env`, then rerun the pr
 ### Metadata
 - Reproducible: yes
 - Related Files: .env.example
+
+---
+## [ERR-20260503-001] shell-find-shadowing
+
+**Logged**: 2026-05-03T12:12:16+05:30
+**Priority**: low
+**Status**: resolved
+**Area**: tooling
+
+### Summary
+`find` resolved to the agent-service custom command instead of system `find`.
+
+### Error
+```text
+Usage: find [-d depth] [-r root] [--dir] [query]
+```
+
+### Context
+- Attempted file discovery in `/Users/denzil/Projects/personal/self/agent`.
+- Switched to `/usr/bin/find` for deterministic shell discovery.
+
+### Suggested Fix
+Use `/usr/bin/find` in repos that may shadow POSIX `find`.
+
+### Metadata
+- Reproducible: yes
+- Related Files: /Users/denzil/Projects/personal/self/agent
+
+---
+
+## [ERR-20260503-002] gemini-cli-trusted-folder
+
+**Logged**: 2026-05-03T12:24:00+05:30
+**Priority**: medium
+**Status**: resolved
+**Area**: tooling
+
+### Summary
+Headless Gemini CLI refused to run the mounted Move workspace until explicitly trusted.
+
+### Error
+```text
+Gemini CLI is not running in a trusted directory.
+```
+
+### Context
+- Triggered `move/autopilot` through the shared agent service.
+- Runner cwd was `/repos/move`; Gemini exited with code 55.
+- Fixed the runner by setting `GEMINI_CLI_TRUST_WORKSPACE=true` for the Gemini harness.
+
+### Suggested Fix
+Always set `GEMINI_CLI_TRUST_WORKSPACE=true` for non-interactive Gemini CLI runs in trusted automation containers.
+
+### Metadata
+- Reproducible: yes
+- Related Files: /Users/denzil/Projects/personal/self/agent/scheduler/runner.py
 
 ---

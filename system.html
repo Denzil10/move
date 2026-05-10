@@ -1,0 +1,456 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Move Pet System</title>
+  <style>
+    :root {
+      --ink: #18202f;
+      --muted: #667085;
+      --line: #d9e0eb;
+      --panel: rgba(255, 255, 255, 0.86);
+      --green: #30a46c;
+      --blue: #2f73d9;
+      --gold: #f4b740;
+      --coral: #ef7058;
+      --lav: #9d7bea;
+      --bg: #f6f8fb;
+      --shadow: 0 22px 60px rgba(24, 32, 47, 0.12);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 14% 12%, rgba(48, 164, 108, 0.22), transparent 28%),
+        radial-gradient(circle at 86% 18%, rgba(47, 115, 217, 0.18), transparent 30%),
+        linear-gradient(135deg, #f7fbf7, #f6f8fb 46%, #fff7e2);
+    }
+
+    main {
+      width: min(1160px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 34px 0 42px;
+    }
+
+    header {
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 18px;
+      align-items: stretch;
+      margin-bottom: 18px;
+    }
+
+    .hero,
+    section,
+    .preview {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(18px);
+    }
+
+    .hero {
+      min-height: 300px;
+      padding: 32px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .eyebrow {
+      margin: 0 0 14px;
+      color: var(--blue);
+      font-size: 12px;
+      font-weight: 900;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      margin: 0;
+      max-width: 760px;
+      font-size: clamp(40px, 6vw, 76px);
+      line-height: 0.94;
+      letter-spacing: 0;
+    }
+
+    .summary {
+      margin: 20px 0 0;
+      max-width: 720px;
+      color: var(--muted);
+      font-size: 18px;
+      line-height: 1.5;
+    }
+
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 9px;
+      margin-top: 24px;
+    }
+
+    .chip {
+      padding: 8px 11px;
+      border-radius: 999px;
+      background: #f1f5fa;
+      border: 1px solid var(--line);
+      font-size: 12px;
+      font-weight: 800;
+      color: #344054;
+    }
+
+    .preview {
+      position: relative;
+      min-height: 300px;
+      overflow: hidden;
+      padding: 18px;
+      background:
+        linear-gradient(180deg, rgba(35, 44, 64, 0.94), rgba(26, 33, 48, 0.96)),
+        var(--panel);
+    }
+
+    .app-window {
+      position: absolute;
+      inset: 26px 28px auto 28px;
+      height: 128px;
+      border-radius: 16px;
+      background: rgba(255,255,255,0.9);
+      padding: 16px;
+      box-shadow: 0 18px 40px rgba(0,0,0,0.24);
+    }
+
+    .line {
+      height: 11px;
+      margin-bottom: 11px;
+      border-radius: 999px;
+      background: #d9e0eb;
+    }
+
+    .line:nth-child(1) { width: 70%; background: #9ed0ff; }
+    .line:nth-child(2) { width: 88%; }
+    .line:nth-child(3) { width: 54%; }
+
+    .prompt {
+      position: absolute;
+      left: 22px;
+      bottom: 22px;
+      width: 230px;
+      padding: 14px 15px;
+      border-radius: 16px;
+      background: #fff;
+      border: 1px solid var(--line);
+      box-shadow: 0 16px 34px rgba(0,0,0,0.24);
+      font-weight: 900;
+    }
+
+    .prompt span {
+      display: block;
+      margin-top: 5px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .pet {
+      position: absolute;
+      right: 34px;
+      bottom: 24px;
+      width: 96px;
+      height: 112px;
+      animation: bob 2.3s ease-in-out infinite;
+    }
+
+    .pet::before,
+    .pet::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      width: 26px;
+      height: 32px;
+      border: 5px solid #243044;
+      border-radius: 14px 14px 7px 7px;
+      background: #9af0bc;
+    }
+
+    .pet::before { left: 16px; transform: rotate(-18deg); }
+    .pet::after { right: 16px; transform: rotate(18deg); }
+
+    .head {
+      position: absolute;
+      left: 17px;
+      top: 14px;
+      width: 62px;
+      height: 58px;
+      border: 5px solid #243044;
+      border-radius: 46% 46% 40% 40%;
+      background: #9af0bc;
+      z-index: 2;
+    }
+
+    .head::before,
+    .head::after {
+      content: "";
+      position: absolute;
+      top: 21px;
+      width: 8px;
+      height: 12px;
+      border-radius: 999px;
+      background: #243044;
+    }
+
+    .head::before { left: 15px; }
+    .head::after { right: 15px; }
+
+    .body {
+      position: absolute;
+      inset: 45px 12px 0;
+      border: 5px solid #243044;
+      border-radius: 44% 44% 32% 32%;
+      background: linear-gradient(180deg, #86e5ad, #31af6b);
+      box-shadow: inset 0 -10px rgba(24,32,47,0.12);
+    }
+
+    section {
+      padding: 24px;
+      margin-top: 18px;
+    }
+
+    .section-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 20px;
+      align-items: end;
+      margin-bottom: 16px;
+    }
+
+    h2 {
+      margin: 0;
+      font-size: clamp(26px, 3vw, 38px);
+      letter-spacing: 0;
+    }
+
+    .section-head p {
+      margin: 0;
+      max-width: 500px;
+      color: var(--muted);
+      line-height: 1.45;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+    }
+
+    .grid.three {
+      grid-template-columns: repeat(3, 1fr);
+    }
+
+    .card {
+      min-height: 128px;
+      padding: 16px;
+      border-radius: 16px;
+      background: #fff;
+      border: 1px solid var(--line);
+    }
+
+    .card h3 {
+      margin: 0 0 8px;
+      font-size: 16px;
+    }
+
+    .card p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.45;
+    }
+
+    .num {
+      display: inline-grid;
+      place-items: center;
+      width: 28px;
+      height: 28px;
+      margin-bottom: 10px;
+      border-radius: 9px;
+      color: #fff;
+      background: var(--ink);
+      font-size: 13px;
+      font-weight: 900;
+    }
+
+    .accent-green { border-top: 5px solid var(--green); }
+    .accent-blue { border-top: 5px solid var(--blue); }
+    .accent-gold { border-top: 5px solid var(--gold); }
+    .accent-coral { border-top: 5px solid var(--coral); }
+    .accent-lav { border-top: 5px solid var(--lav); }
+
+    .progress {
+      display: grid;
+      gap: 10px;
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: 128px 1fr 72px;
+      gap: 12px;
+      align-items: center;
+      font-size: 13px;
+      font-weight: 850;
+    }
+
+    .bar {
+      height: 10px;
+      border-radius: 999px;
+      background: #e8edf5;
+      overflow: hidden;
+    }
+
+    .bar span {
+      display: block;
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, var(--green), var(--blue));
+    }
+
+    ol {
+      margin: 0;
+      padding-left: 20px;
+      color: var(--muted);
+      line-height: 1.7;
+    }
+
+    footer {
+      margin-top: 18px;
+      color: var(--muted);
+      font-size: 13px;
+      text-align: center;
+    }
+
+    @keyframes bob {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-9px); }
+    }
+
+    @media (max-width: 920px) {
+      header,
+      .grid,
+      .grid.three {
+        grid-template-columns: 1fr;
+      }
+
+      .section-head {
+        display: block;
+      }
+
+      .section-head p {
+        margin-top: 8px;
+      }
+    }
+
+    @media (max-width: 560px) {
+      main { width: min(100% - 20px, 1160px); padding-top: 18px; }
+      .hero, section, .preview { border-radius: 18px; padding: 18px; }
+      .row { grid-template-columns: 1fr; gap: 6px; }
+      .prompt { width: calc(100% - 44px); bottom: 142px; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <div class="hero">
+        <div>
+          <p class="eyebrow">Move Pet System</p>
+          <h1>Regular movement, made hard to ignore.</h1>
+          <p class="summary">A tiny desktop pet appears at intervals, gives one fun movement prompt, verifies local motion, celebrates, and gets out of the way.</p>
+        </div>
+        <div class="chips">
+          <span class="chip">Tauri + React</span>
+          <span class="chip">Local camera scoring</span>
+          <span class="chip">Rich bundled pet library</span>
+          <span class="chip">No user-generated pets</span>
+          <span class="chip">Strict mode later</span>
+        </div>
+      </div>
+
+      <aside class="preview" aria-label="POC preview">
+        <div class="app-window" aria-hidden="true">
+          <div class="line"></div>
+          <div class="line"></div>
+          <div class="line"></div>
+        </div>
+        <div class="prompt">March in place for 60 seconds<span>Local only. No frames stored.</span></div>
+        <div class="pet" aria-hidden="true"><div class="head"></div><div class="body"></div></div>
+      </aside>
+    </header>
+
+    <section aria-labelledby="architecture">
+      <div class="section-head">
+        <h2 id="architecture">Architecture And Logic</h2>
+        <p>One compact desktop loop: interval, prompt, pet animation, local motion score, reward.</p>
+      </div>
+      <div class="grid">
+        <article class="card accent-green"><span class="num">1</span><h3>Prompt Timer</h3><p>Configurable intervals choose short movement prompts: march, stretch, squats, shoulder rolls, water walk.</p></article>
+        <article class="card accent-blue"><span class="num">2</span><h3>Pet Overlay</h3><p>Transparent always-on-top Tauri window shows a bundled Hatch/Codex-style pet pack.</p></article>
+        <article class="card accent-gold"><span class="num">3</span><h3>Motion Check</h3><p>Browser webcam frame-diff scores movement locally; frames are discarded immediately.</p></article>
+        <article class="card accent-coral"><span class="num">4</span><h3>Reward Loop</h3><p>Three seconds of movement makes the pet happy; full target shows streak, calories, and victory.</p></article>
+      </div>
+    </section>
+
+    <section aria-labelledby="autopilot">
+      <div class="section-head">
+        <h2 id="autopilot">Autopilot System</h2>
+        <p>The business loop keeps shipping, research, docs, packaging, and launch assets moving from the shared agent service.</p>
+      </div>
+      <div class="grid three">
+        <article class="card accent-blue"><h3>Runtime</h3><p>Shared agent service at <code>/Users/denzil/Projects/personal/self/agent</code>, project config under <code>projects/move</code>.</p></article>
+        <article class="card accent-green"><h3>Cadence</h3><p>Runs every 5 minutes when active: research, execute, review, improve, then update backlog/docs.</p></article>
+        <article class="card accent-lav"><h3>Guardrails</h3><p>Use free-tier tools first. Ask only for pricing, public launch, paid services, credentials, or risky distribution calls.</p></article>
+      </div>
+    </section>
+
+    <section aria-labelledby="progress">
+      <div class="section-head">
+        <h2 id="progress">Progress And Next</h2>
+        <p>Current direction: compact product, richer bundled pet library, rotating movement prompts, no user pet generation this phase.</p>
+      </div>
+      <div class="grid three">
+        <article class="card">
+          <h3>Progress</h3>
+          <div class="progress">
+            <div class="row"><span>Runtime</span><div class="bar"><span style="width:100%"></span></div><span>done</span></div>
+            <div class="row"><span>Prototype</span><div class="bar"><span style="width:88%"></span></div><span>strong</span></div>
+            <div class="row"><span>Motion Loop</span><div class="bar"><span style="width:78%"></span></div><span>MVP</span></div>
+            <div class="row"><span>Packaging</span><div class="bar"><span style="width:64%"></span></div><span>mixed</span></div>
+            <div class="row"><span>Pet Library</span><div class="bar"><span style="width:36%"></span></div><span>source</span></div>
+          </div>
+        </article>
+        <article class="card">
+          <h3>Next Build Steps</h3>
+          <ol>
+            <li>Source the richest popular open Hatch/Codex-compatible pet library.</li>
+            <li>Bundle pet picker data without import/generation UI.</li>
+            <li>Implement rotating prompts tied to interval state.</li>
+            <li>Wire pet states to prompt, motion, happy, victory.</li>
+          </ol>
+        </article>
+        <article class="card">
+          <h3>Definition Of Done</h3>
+          <p><strong>inactive -> prompt -> motion -> happy -> victory</strong></p>
+          <p>Verified install, dev run, build, and a manual full movement loop with local-only camera handling.</p>
+        </article>
+      </div>
+    </section>
+
+    <footer>Move Pet system snapshot. Three sections: architecture, autopilot, progress.</footer>
+  </main>
+</body>
+</html>

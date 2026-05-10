@@ -40,6 +40,7 @@ class MockRequest:
         }
 
     def model_dump(self, exclude_none=True):
+        _ = exclude_none
         return dict(self._body)
 
 

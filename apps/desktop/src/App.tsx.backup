@@ -1,0 +1,2264 @@
+import React from "react";
+import { useState } from "react";
+import { useEffect } from "react";
+import { useMemo } from "react";
+import { invoke } from "@tauri-apps/api/core";
+import { getCurrentWindow } from "@tauri-apps/api/window";
+import Pet from "./components/Pet";
+import VoiceIndicator from "./components/VoiceIndicator";
+import VictoryToast from "./components/VictoryToast";
+import LevelUpToast from "./components/LevelUpToast";
+import GoalReachedToast from "./components/GoalReachedToast";
+import GiftToast from "./components/GiftToast";
+import StrictModeOverlay from "./components/StrictModeOverlay";
+import StatsSummary from "./components/StatsSummary";
+import HistoryList from "./components/HistoryList";
+import Customization from "./components/Customization";
+import Settings from "./components/Settings";
+import PetJournal from "./components/PetJournal";
+import { DiaryEntry } from "./components/PetDiary";
+import { PetDream } from "./components/PetDreams";
+import AchievementToast from "./components/AchievementToast";
+import QuestJournal from "./components/QuestJournal";
+import Inventory from "./components/Inventory";
+import PetShop from "./components/PetShop";
+import Collection from "./components/Collection";
+import PetConversation from './components/PetConversation';
+import AppUsageReport from './components/AppUsageReport';
+import FriendToast from './components/FriendToast';
+import FriendshipLevelUpToast from './components/FriendshipLevelUpToast';
+import BreathingExercise from "./components/BreathingExercise";
+import SkillTree from "./components/SkillTree";
+import DailyRecap from "./components/DailyRecap";
+import { ACHIEVEMENTS, Achievement } from "./achievements";
+import { PET_SPECIES, PetSpecies } from "./collection";
+import { BACKGROUNDS } from "./backgrounds";
+import { Quest, CompletedQuest, generateRandomQuest } from "./quests";
+import { ITEMS } from "./items";
+import { PersonalityType, PERSONALITIES } from "./personalities";
+import { useInactivity } from "./hooks/useInactivity";
+import { useMotionDetection } from "./hooks/useMotionDetection";
+import { usePetState } from "./hooks/usePetState";
+import { useLocalStorage } from "./hooks/useLocalStorage";
+import { useSoundEffects } from "./hooks/useSoundEffects";
+import { useMousePosition } from "./hooks/useMousePosition";
+import { useSoundReactions } from "./hooks/useSoundReactions";
+import { usePetMood } from "./hooks/usePetMood";
+import { usePetEnergy } from "./hooks/usePetEnergy";
+import { usePetBuffs } from "./hooks/usePetBuffs";
+import { usePetFriendship } from "./hooks/usePetFriendship";
+import { useWeather } from "./hooks/useWeather";
+import { useSeasons } from "./hooks/useSeasons";
+import { usePetFriends, PetFriend } from "./hooks/usePetFriends";
+import { usePetSkills } from "./hooks/usePetSkills";
+import { SKILLS } from "./skills";
+import { MovementPrompt, getRandomPrompt, getFocusPrompt } from "./prompts";
+import ShareImageGenerator from "./components/ShareImageGenerator";
+import "./App.css";
+
+interface WeeklyData {
+  day: string;
+  moves: number;
+  calories: number;
+  avgMood?: number;
+}
+
+
+const isWithinWindow = (time: string, start: string, end: string) => {
+  if (start <= end) {
+    return time >= start && time < end;
+  } else {
+    return time >= start || time < end;
+  }
+};
+
+function App() {
+  const [autoMode, setAutoMode] = useState(true);
+  
+  // Persisted state
+  const [petName, setPetName] = useLocalStorage("move-pet-name", "Buddy");
+  const [personality, setPersonality] = useLocalStorage<PersonalityType>("move-pet-personality", "supportive");
+  const [petCoins, setPetCoins] = useLocalStorage("move-pet-coins", 0);
+  const [happiness, setHappiness] = useLocalStorage("move-pet-happiness", 50);
+  
+  const personalityData = PERSONALITIES.find(p => p.id === personality) || PERSONALITIES[0];
+  const [inventory, setInventory] = useLocalStorage<Record<string, number>>("move-pet-inventory", {});
+  const [unlockedCosmetics, setUnlockedCosmetics] = useLocalStorage<string[]>(
+    "move-pet-unlocked-cosmetics",
+    ["default-green"]
+  );
+  const [petColor, setPetColor] = useLocalStorage("move-pet-color", "#4caf50");
+  const [selectedSpecies, setSelectedSpecies] = useLocalStorage("move-pet-selected-species", "emerald_dragon");
+  const [streak, setStreak] = useLocalStorage("move-pet-streak", 0);
+  const [careStreak, setCareStreak] = useLocalStorage("move-pet-care-streak", 0);
+  const [totalMovements, setTotalMovements] = useLocalStorage("move-pet-total-movements", 0);
+  const [totalCalories, setTotalCalories] = useLocalStorage("move-pet-total-calories", 0);
+  const [dailyMovements, setDailyMovements] = useLocalStorage("move-pet-daily-movements", 0);
+  const [dailyCalories, setDailyCalories] = useLocalStorage("move-pet-daily-calories", 0);
+  const [activeQuests, setActiveQuests] = useLocalStorage<Quest[]>("move-pet-active-quests", []);
+  const [questHistory, setQuestHistory] = useLocalStorage<CompletedQuest[]>("move-pet-quest-history", []);
+  const [weeklyData, setWeeklyData] = useLocalStorage<WeeklyData[]>("move-pet-weekly-data", [
+    { day: "Sun", moves: 0, calories: 0, avgMood: 0, moodSamples: 0 },
+    { day: "Mon", moves: 0, calories: 0, avgMood: 0, moodSamples: 0 },
+    { day: "Tue", moves: 0, calories: 0, avgMood: 0, moodSamples: 0 },
+    { day: "Wed", moves: 0, calories: 0, avgMood: 0, moodSamples: 0 },
+    { day: "Thu", moves: 0, calories: 0, avgMood: 0, moodSamples: 0 },
+    { day: "Fri", moves: 0, calories: 0, avgMood: 0, moodSamples: 0 },
+    { day: "Sat", moves: 0, calories: 0, avgMood: 0, moodSamples: 0 },
+  ]);
+  const [dailyGoal, setDailyGoal] = useLocalStorage("move-pet-daily-goal", 100);
+  const [dailyStreakGoal, setDailyStreakGoal] = useLocalStorage("move-pet-daily-streak-goal", 5);
+  const [showDailyRecap, setShowDailyRecap] = useState(false);
+  const [showShareGenerator, setShowShareGenerator] = useState(false);
+  const [yesterdayStats, setYesterdayStats] = useLocalStorage("move-pet-yesterday-stats", {
+    movements: 0,
+    calories: 0,
+    goalReached: false,
+    streak: 0,
+    careStreak: 0,
+    coinsEarned: 0
+  });
+  const [hunger, setHunger] = useLocalStorage("move-pet-hunger", 100);
+  const [hydration, setHydration] = useLocalStorage("move-pet-hydration", 100);
+  const [dailyNeedsAvg, setDailyNeedsAvg] = useLocalStorage("move-pet-daily-needs-avg", {
+    hunger: 0,
+    hydration: 0,
+    energy: 0,
+    samples: 0
+  });
+  const [lastUpdateDate, setLastUpdateDate] = useLocalStorage("move-pet-last-update-date", "");
+  const [goalReachedToastShown, setGoalReachedToastShown] = useLocalStorage("move-pet-goal-reached-shown", false);
+  const [theme, setTheme] = useLocalStorage<"light" | "dark" | "system">("move-pet-theme", "system");
+  const [enabledAccessories, setEnabledAccessories] = useLocalStorage<Record<string, boolean>>(
+    "move-pet-enabled-accessories",
+    { collar: true, wings: true, hat: true }
+  );
+  const [milestones, setMilestones] = useLocalStorage<Milestone[]>("move-pet-milestones", []);
+  const [unlockedAchievements, setUnlockedAchievements] = useLocalStorage<Achievement[]>("move-pet-achievements", []);
+  const [unlockedSpecies, setUnlockedSpecies] = useLocalStorage<PetSpecies[]>("move-pet-unlocked-species", [PET_SPECIES[0]]);
+  const [selectedBackground, setSelectedBackground] = useLocalStorage("move-pet-selected-background", "default");
+  const [unlockedBackgrounds, setUnlockedBackgrounds] = useLocalStorage<string[]>("move-pet-unlocked-backgrounds", ["default"]);
+  const [adoptionDate, setAdoptionDate] = useLocalStorage("move-pet-adoption-date", "");
+  const [diaryEntries, setDiaryEntries] = useLocalStorage<DiaryEntry[]>("move-pet-diary-entries", []);
+  const [petDreams, setPetDreams] = useLocalStorage<PetDream[]>("move-pet-dreams", []);
+  const [appUsage, setAppUsage] = useLocalStorage<Record<string, number>>("move-pet-app-usage", {});
+  const [lastBirthdayCelebrated, setLastBirthdayCelebrated] = useLocalStorage("move-pet-last-birthday", "");
+  
+  const handleDreamRecorded = (dreamContent: string) => {
+    const newDream: PetDream = {
+      id: Math.random().toString(36).substring(2, 9),
+      date: new Date().toISOString(),
+      text: dreamContent,
+      personality: personalityData.name
+    };
+    setPetDreams(prev => [newDream, ...prev].slice(0, 50));
+  };
+
+  const handleExportPetData = async () => {
+    try {
+      const petData = {
+        personality,
+        petCoins,
+        happiness,
+        selectedSpecies,
+        streak,
+        careStreak,
+        totalMovements,
+        totalCalories,
+        dailyMovements,
+        dailyCalories,
+        activeQuests: activeQuests.map(q => ({ ...q })),
+        questHistory: questHistory.map(q => ({ ...q })),
+        weeklyData: [...weeklyData],
+        dailyGoal,
+        dailyStreakGoal,
+        yesterdayStats,
+        hunger,
+        hydration,
+        dailyNeedsAvg,
+        lastUpdateDate,
+        goalReachedToastShown,
+        theme,
+        enabledAccessories,
+        milestones: [...milestones],
+        unlockedAchievements: unlockedAchievements.map(a => ({ ...a })),
+        unlockedSpecies: unlockedSpecies.map(s => ({ ...s })),
+        selectedBackground,
+        unlockedBackgrounds: [...unlockedBackgrounds],
+        adoptionDate,
+        diaryEntries: [...diaryEntries],
+        petDreams: [...petDreams],
+        appUsage: { ...appUsage },
+        lastBirthdayCelebrated,
+        
+        // Settings
+        targetDuration,
+        motionThreshold,
+        deviceId,
+        isPaused,
+        miniMode,
+        isAlwaysOnTop,
+        strictMode,
+        soundEnabled,
+        soundVolume,
+        petOpacity,
+        inactivityTimeout,
+        
+        // Advanced features
+        sleepScheduleEnabled,
+        bedtime,
+        wakeTime,
+        quietHoursEnabled,
+        quietHoursStart,
+        quietHoursEnd,
+        quietHoursWeekendEnabled,
+        quietHoursWeekendStart,
+        quietHoursWeekendEnd,
+        productivityModeEnabled,
+        focusApps: [...focusApps],
+        smartFocusEnabled,
+        smartFocusInterval,
+        
+        // Derived stats
+        petLevel: Math.floor(totalCalories / 50) + 1,
+        exportDate: new Date().toISOString(),
+        appVersion: "0.1.0"
+      };
+
+      // Convert to JSON string with proper formatting
+      const jsonData = JSON.stringify(petData, null, 2);
+      
+      // Ask user where to save the file
+      const { save } = await invoke('plugin:dialog|ask');
+      const { path } = await save({
+        title: 'Export Pet Data',
+        defaultPath: `move-pet-backup-${new Date().toISOString().slice(0,10)}.json`,
+        filters: [
+          { name: 'JSON', extensions: ['json'] }
+        ]
+      });
+      
+      if (path) {
+        // Save the file using Tauri FS plugin
+        await invoke('plugin:fs|writeFile', { path, contents: jsonData });
+        setThoughtOverride(`Export completed successfully! 💾`);
+        setTimeout(() => setThoughtOverride(null), 5000);
+      }
+    } catch (error: any) {
+      console.error('Failed to export pet data:', error);
+      setThoughtOverride(`Export failed: ${error.message || 'Unknown error'}`);
+      setTimeout(() => setThoughtOverride(null), 5000);
+    }
+  };
+
+  useEffect(() => {
+    if (!adoptionDate) {
+      setAdoptionDate(new Date().toISOString());
+    }
+  }, [adoptionDate, setAdoptionDate]);
+
+  const activeBackground = BACKGROUNDS.find(bg => bg.id === selectedBackground) || BACKGROUNDS[0];
+  const [recentlyDiscoveredSpecies, setRecentlyDiscoveredSpecies] = useState<PetSpecies | null>(null);
+  const [recentAchievement, setRecentAchievement] = useState<Achievement | null>(null);
+  const [showBreathing, setShowBreathing] = useState(false);
+  const [showJournal, setShowJournal] = useState(false);
+  const [showQuestJournal, setShowQuestJournal] = useState(false);
+  const [showCollection, setShowCollection] = useState(false);
+  const [showSkillTree, setShowSkillTree] = useState(false);
+  const [showConversation, setShowConversation] = useState(false);
+  const [showAppUsageReport, setShowAppUsageReport] = useState(false);
+  const [isResting, setIsResting] = useState(false);
+  const [activeTraining, setActiveTraining] = useState<string | null>(null);
+  const [trainingLevels, setTrainingLevels] = useLocalStorage<Record<string, number>>("move-pet-training-levels", {
+    energy: 0,
+    xp: 0,
+    coins: 0,
+    strength: 0,
+    hunger: 0
+  });
+  const [foundGift, setFoundGift] = useState<{ name: string; icon: string } | null>(null);
+  const [foundFriend, setFoundFriend] = useState<PetFriend | null>(null);
+  const [currentPrompt, setCurrentPrompt] = useState<MovementPrompt | null>(null);
+  const [thoughtOverride, setThoughtOverride] = useState<string | null>(null);
+  const { activeFriend, meetFriend } = usePetFriends();
+  const { unlockedSkills, unlockSkill, getSkillMultiplier } = usePetSkills();
+  
+  // Sleep Schedule state
+  const [sleepScheduleEnabled, setSleepScheduleEnabled] = useLocalStorage("move-pet-sleep-schedule-enabled", false);
+  const [bedtime, setBedtime] = useLocalStorage("move-pet-bedtime", "22:00");
+  const [wakeTime, setWakeTime] = useLocalStorage("move-pet-wake-time", "07:00");
+
+  // Quiet Hours state
+  const [quietHoursEnabled, setQuietHoursEnabled] = useLocalStorage("move-pet-quiet-hours-enabled", false);
+  const [quietHoursStart, setQuietHoursStart] = useLocalStorage("move-pet-quiet-hours-start", "00:00");
+  const [quietHoursEnd, setQuietHoursEnd] = useLocalStorage("move-pet-quiet-hours-end", "08:00");
+  const [quietHoursWeekendEnabled, setQuietHoursWeekendEnabled] = useLocalStorage("move-pet-quiet-hours-weekend", false);
+  const [quietHoursWeekendStart, setQuietHoursWeekendStart] = useLocalStorage("move-pet-quiet-hours-weekend-start", "00:00");
+  const [quietHoursWeekendEnd, setQuietHoursWeekendEnd] = useLocalStorage("move-pet-quiet-hours-weekend-end", "10:00");
+
+  // Productivity Mode state
+  const [productivityModeEnabled, setProductivityModeEnabled] = useLocalStorage("move-pet-productivity-mode-enabled", false);
+  const [focusApps, setFocusApps] = useLocalStorage<string[]>("move-pet-focus-apps", ["Code", "Visual Studio Code", "Cursor", "Zed", "IntelliJ IDEA", "Visual Studio", "Sublime Text", "WebStorm", "PyCharm", "Rider"]);
+  const [focusedApp, setFocusedApp] = useState<string>("");
+  const [smartFocusEnabled, setSmartFocusEnabled] = useLocalStorage("move-pet-smart-focus-enabled", true);
+  const [smartFocusInterval, setSmartFocusInterval] = useLocalStorage("move-pet-smart-focus-interval", 60); // Default 60 minutes
+
+  const [strictMode, setStrictMode] = useLocalStorage("move-pet-strict-mode", false);
+  const [soundEnabled, setSoundEnabled] = useLocalStorage("move-pet-sound-enabled", true);
+  const [soundVolume, setSoundVolume] = useLocalStorage("move-pet-sound-volume", 0.5);
+  const [petOpacity, setPetOpacity] = useLocalStorage("move-pet-opacity", 1.0);
+  const [inactivityTimeout, setInactivityTimeout] = useLocalStorage("move-pet-inactivity-timeout", 5000);
+
+  useEffect(() => {
+    invoke("set_sound_volume", { volume: soundVolume });
+  }, [soundVolume]);
+  const [targetDuration, setTargetDuration] = useLocalStorage("move-pet-target-duration", 3);
+  const [motionThreshold, setMotionThreshold] = useLocalStorage("move-pet-motion-threshold", 2.0);
+  const [deviceId, setDeviceId] = useLocalStorage("move-pet-device-id", "");
+  const [isPaused, setIsPaused] = useLocalStorage("move-pet-is-paused", false);
+  const [miniMode, setMiniMode] = useLocalStorage("move-pet-mini-mode", false);
+
+  const [devices, setDevices] = useState<MediaDeviceInfo[]>([]);
+  const [windowPosition, setWindowPosition] = useState({ x: 0, y: 0 });
+
+  const [history, setHistory] = useLocalStorage<{ id: string, date: string, calories: number, duration: number }[]>(
+    "move-pet-history", 
+    []
+  );
+
+  const petLevel = Math.floor(totalCalories / 50) + 1;
+  const { idleTime } = useInactivity();
+  const [isInactive, setIsInactive] = useState(false);
+  const { motionScore, isMoving, hasPermission } = useMotionDetection(motionThreshold, 100, deviceId);
+  const { activeBuffs, addBuff, hasBuff, getMultiplier } = usePetBuffs();
+  const { friendshipLevel, friendshipData, boostFriendship } = usePetFriendship();
+  const { mood: moodScore, moodCategory, boostMood, setMood } = usePetMood(
+    hunger,
+    isInactive,
+    isMoving,
+    petLevel,
+    hasBuff('mood_shield'),
+    hasBuff('mood_boost'),
+    personalityData.hungerModifier,
+    activeBackground.buff?.type === 'mood' ? activeBackground.buff.value : 1.0
+  );
+
+  // Memoized effective timeout based on mood
+  const effectiveTimeout = useMemo(() => {
+    return moodCategory === "joyful"
+      ? inactivityTimeout * 1.2
+      : moodCategory === "grumpy"
+        ? inactivityTimeout * 0.8
+        : inactivityTimeout;
+  }, [moodCategory, inactivityTimeout]);
+
+  const { playChirp, playLevelUp, playGoalReached, playItemUse } = useSoundEffects();
+
+  const unlockAchievement = (id: string): boolean => {
+    if (unlockedAchievements.some(a => a.id === id)) return false;
+
+    const achievement = ACHIEVEMENTS.find(a => a.id === id);
+    if (achievement) {
+      const unlocked = { ...achievement, unlockedAt: new Date().toISOString() };
+      setUnlockedAchievements(prev => [...prev, unlocked]);
+      setRecentAchievement(unlocked);
+
+      if (soundEnabled) {
+
+
+      setTimeout(() => setRecentAchievement(null), 5000);
+      return true;
+    }
+    return false;
+  };
+
+  // Check for Pet Birthday
+  useEffect(() => {
+    if (!adoptionDate) return;
+
+    const now = new Date();
+    const adoption = new Date(adoptionDate);
+    
+    // Check if it's the same month and day, and at least one year has passed
+    const isAnniversary = now.getMonth() === adoption.getMonth() && 
+                          now.getDate() === adoption.getDate() &&
+                          now.getFullYear() > adoption.getFullYear();
+
+    const currentYear = now.getFullYear().toString();
+
+    if (isAnniversary && lastBirthdayCelebrated !== currentYear) {
+      setLastBirthdayCelebrated(currentYear);
+      unlockAchievement("birthday_bash");
+      
+      // Special birthday rewards
+      setPetCoins(prev => prev + 500);
+      setTotalCalories(prev => prev + 100); // 100 XP bonus
+      boostMood(100);
+      boostFriendship(20);
+
+      const newMilestone: Milestone = { 
+        level: petLevel, 
+        date: new Date().toISOString(), 
+        description: `Happy Birthday, ${petName}! Celebrating ${now.getFullYear() - adoption.getFullYear()} year(s) together. 🎂`, 
+        moment: "🎂" 
+      };
+      setMilestones(prev => [...prev, newMilestone]);
+      
+      setThoughtOverride(`It's my adoption anniversary today! I'm so happy we're together! 🎂💖`);
+      setTimeout(() => setThoughtOverride(null), 10000);
+    }
+  }, [adoptionDate, lastBirthdayCelebrated, petLevel, petName, setPetCoins, setTotalCalories, unlockAchievement, boostMood, boostFriendship, setMilestones, setLastBirthdayCelebrated]);
+
+  const unlockSpecies = (id: string) => {
+    if (unlockedSpecies.some(s => s.id === id)) return;
+
+    const species = PET_SPECIES.find(s => s.id === id);
+    if (species) {
+      const unlocked = { ...species, unlockedAt: new Date().toISOString() };
+      setUnlockedSpecies(prev => [...prev, unlocked]);
+      setRecentlyDiscoveredSpecies(unlocked);
+
+      if (soundEnabled) {
+
+
+      setThoughtOverride(`Wow! I've discovered the ${species.name} species! 🌟`);
+      setTimeout(() => setThoughtOverride(null), 5000);
+      setTimeout(() => setRecentlyDiscoveredSpecies(null), 5000);
+    }
+  };
+
+  const checkSpeciesUnlocks = (stats: { 
+    totalMoves: number, 
+    totalCal: number, 
+    streak: number, 
+    level: number,
+    caloriesThisMove: number,
+    currentSeason: string,
+    currentWeather: string | undefined,
+    strengthLevel: number
+  }) => {
+    // Ruby Drake: 10 calories in a single session
+    if (stats.caloriesThisMove >= 10) unlockSpecies("ruby_drake");
+
+    // Sapphire Serpent: 3-day streak
+    if (stats.streak >= 3) unlockSpecies("sapphire_serpent");
+
+    // Golden Gryphon: Level 10
+    if (stats.level >= 10) unlockSpecies("golden_gryphon");
+
+    // Shadow Stalker: Late night hours
+    const hour = new Date().getHours();
+    if (hour >= 22 || hour <= 4) {
+
+
+    // Frost Wyrm: Winter
+    if (stats.currentSeason === "winter") unlockSpecies("frost_wyrm");
+
+    // Solar Phoenix: Summer
+    if (stats.currentSeason === "summer") unlockSpecies("solar_phoenix");
+    
+    // Void Stalker: 50 total moves
+    if (stats.totalMoves >= 50) unlockSpecies("void_stalker");
+    
+    // Thunder Gryphon: Snowy weather (high energy)
+    if (stats.currentWeather === "snowy") unlockSpecies("thunder_gryphon");
+
+    // Titan Dragon: Strength level 5
+    if (stats.strengthLevel >= 5) unlockSpecies("titan_dragon");
+
+    // Calico Cat: 10 movements in a day
+    if (dailyMovements >= 10) unlockSpecies("calico_cat");
+
+    // Loyal Labrador: 5-day care streak
+    if (careStreak >= 5) unlockSpecies("loyal_labrador");
+
+    // Quantum Bot: Level 15
+    if (petLevel >= 15) unlockSpecies("quantum_bot");
+  };
+
+  useEffect(() => {
+    if (isPaused) {
+      setIsInactive(false);
+      return;
+    }
+
+    if (quietHoursEnabled) {
+      const now = new Date();
+      const isWeekend = now.getDay() === 0 || now.getDay() === 6;
+      const hours = now.getHours();
+      const minutes = now.getMinutes();
+      const currentTimeStr = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+
+      if (isWeekend && quietHoursWeekendEnabled) {
+        if (isWithinWindow(currentTimeStr, quietHoursWeekendStart, quietHoursWeekendEnd)) {
+          setIsInactive(false);
+          return;
+        }
+      } else if (!isWeekend) {
+        if (isWithinWindow(currentTimeStr, quietHoursStart, quietHoursEnd)) {
+          setIsInactive(false);
+          return;
+        }
+      }
+    }
+
+    if (productivityModeEnabled && focusApps.some(app => focusedApp.includes(app))) {
+      setIsInactive(false);
+      return;
+    }
+
+    setIsInactive(idleTime >= effectiveTimeout);
+  }, [idleTime, effectiveTimeout, isPaused, quietHoursEnabled, quietHoursStart, quietHoursEnd, quietHoursWeekendEnabled, quietHoursWeekendStart, quietHoursWeekendEnd, productivityModeEnabled, focusApps, focusedApp]);
+
+  const mousePosition = useMousePosition(true, 50); // Always track, 50ms interval for smooth eyes
+  const { soundLevel } = useSoundReactions(soundEnabled);
+  const { weather } = useWeather();
+  const { season } = useSeasons();
+  
+  // Track window position for eye tracking
+  useEffect(() => {
+    const updateWindowPosition = async () => {
+      try {
+        const appWindow = getCurrentWindow();
+        const pos = await appWindow.outerPosition();
+        setWindowPosition({ x: pos.x, y: pos.y });
+      } catch (err) {
+        console.error("Failed to get window position:", err);
+      }
+    };
+    
+    updateWindowPosition();
+    // Also update on window move
+    const unlisten = getCurrentWindow().onMoved(({ payload: pos }) => {
+      setWindowPosition({ x: pos.x, y: pos.y });
+    });
+    
+    return () => {
+      unlisten.then(u => u());
+    };
+  }, []);
+
+  const { 
+    state, 
+    isLocked, 
+    movementDuration, 
+    lastMoveDuration, 
+    averageIntensity,
+    showToast, 
+    setShowToast,
+    setState,
+    reset
+  } = usePetState(
+    autoMode ? isInactive : false, 
+    isMoving, 
+    activeTraining ? targetDuration * 2 : targetDuration, 
+    strictMode,
+    isResting,
+    motionScore
+  );
+
+  // Movement Prompts effect
+  useEffect(() => {
+    if (state === "disturbed" && !currentPrompt) {
+      const prompt = getRandomPrompt();
+      setCurrentPrompt(prompt);
+      setThoughtOverride(`${prompt.text}: ${prompt.description}`);
+    } else if (state !== "disturbed" && currentPrompt) {
+      // Only clear thoughtOverride if it was the prompt
+      setThoughtOverride(prev => {
+        if (prev === `${currentPrompt?.text}: ${currentPrompt?.description}`) {
+          return null;
+        }
+        return prev;
+      });
+      setCurrentPrompt(null);
+    }
+  }, [state, currentPrompt]);
+
+  const { energy, energyCategory, setEnergy } = usePetEnergy(
+    state, 
+    isMoving, 
+    hasBuff('energy_surge'),
+    personalityData.energyModifier,
+    trainingLevels.energy,
+    activeBackground.buff?.type === 'energy' ? activeBackground.buff.value : 1.0
+  );
+
+  const strengthBoost = 1 + ((trainingLevels.strength || 0) * 0.05);
+  const backgroundCalorieMultiplier = (activeBackground.buff?.type === 'calories' ? activeBackground.buff.value : 1.0);
+  const intensityMultiplier = (1 + (averageIntensity / 100)) * strengthBoost * backgroundCalorieMultiplier;
+  const calories = Math.floor(lastMoveDuration * 0.1 * intensityMultiplier);
+  const [prevLevel, setPrevLevel] = useLocalStorage("move-pet-prev-level", petLevel);
+  const [prevFriendshipLevel, setPrevFriendshipLevel] = useLocalStorage("move-pet-prev-friendship-level", friendshipLevel);
+  const [recordedCalorieMilestones, setRecordedCalorieMilestones] = useLocalStorage<number[]>("move-pet-recorded-calorie-milestones", []);
+  const [recordedCareStreakMilestones, setRecordedCareStreakMilestones] = useLocalStorage<number[]>("move-pet-recorded-care-streak-milestones", []);
+  const [showLevelUp, setShowLevelUp] = useState(false);
+  const [showFriendshipLevelUp, setShowFriendshipLevelUp] = useState(false);
+  const [showGoalReached, setShowGoalReached] = useState(false);
+  const [restStartTime, setRestStartTime] = useState<number | null>(null);
+  const [isAlwaysOnTop, setIsAlwaysOnTop] = useLocalStorage("move-pet-always-on-top", false);
+
+  // Floating behavior
+  useEffect(() => {
+    const updateFloatingSettings = async () => {
+      try {
+        if (state === "floating") {
+          await invoke("set_always_on_top", { alwaysOnTop: true });
+          await invoke("set_ignore_cursor_events", { ignore: true });
+        } else if (!isLocked) {
+          // Only restore if not locked (locked has its own settings in StrictModeOverlay)
+          await invoke("set_always_on_top", { alwaysOnTop: isAlwaysOnTop });
+          await invoke("set_ignore_cursor_events", { ignore: false });
+        }
+      } catch (err) {
+        console.error("Failed to update floating window settings:", err);
+      }
+    };
+    updateFloatingSettings();
+  }, [state, isLocked, isAlwaysOnTop]);
+
+  useEffect(() => {
+    if (showLevelUp && soundEnabled) {
+      playLevelUp();
+    }
+  }, [showLevelUp, soundEnabled, playLevelUp]);
+
+  useEffect(() => {
+    if (showGoalReached && soundEnabled) {
+      playGoalReached();
+    }
+  }, [showGoalReached, soundEnabled, playGoalReached]);
+
+  // Smart Focus logic
+  const [focusDuration, setFocusDuration] = useState(0); // Minutes of continuous focus
+  const [lastSmartFocusBreak, setLastSmartFocusBreak] = useState(0);
+  const [awayFromFocusTime, setAwayFromFocusTime] = useState(0);
+
+  useEffect(() => {
+    if (!productivityModeEnabled) {
+      setFocusedApp("");
+      setFocusDuration(0);
+      setAwayFromFocusTime(0);
+      return;
+    }
+
+    const checkFocusedApp = async () => {
+      try {
+        const app = await invoke('get_focused_window_name');
+        const appName = app as string;
+        setFocusedApp(appName);
+
+        const isFocusing = appName && focusApps.some(fa => appName.includes(fa));
+
+        if (isFocusing) {
+          setFocusDuration(prev => prev + (5 / 60)); // Add 5 seconds in minutes
+          setAwayFromFocusTime(0);
+          setAppUsage(prev => ({
+            ...prev,
+            [appName]: (prev[appName] || 0) + (5 / 60)
+          }));
+        } else {
+          setAwayFromFocusTime(prev => prev + 5);
+          if (awayFromFocusTime >= 60) { // 1 minute grace period
+            setFocusDuration(0);
+            setLastSmartFocusBreak(0);
+          }
+        }
+      } catch (err) {
+        console.error("Failed to check focused app:", err);
+      }
+    };
+
+    const interval = setInterval(checkFocusedApp, 5000);
+    return () => clearInterval(interval);
+  }, [productivityModeEnabled, focusApps, awayFromFocusTime]);
+
+  // Smart Focus suggestions and Focus Zen buff
+  useEffect(() => {
+    if (!smartFocusEnabled) return;
+
+    // Trigger Focus Zen buff every 25 minutes of continuous focus
+    if (focusDuration >= 25 && (focusDuration % 25 < 5/60) && !hasBuff('focus_zen')) {
+      addBuff('focus_zen', 15, 1.25);
+      setThoughtOverride("Your intense focus has enlightened me! I feel Zen. Next time we move, rewards will be increased! 🧘‍♂️✨");
+      setTimeout(() => setThoughtOverride(null), 8000);
+    }
+
+    if (focusDuration >= smartFocusInterval && (focusDuration - lastSmartFocusBreak) >= smartFocusInterval) {
+      const suggestBreathing = Math.random() < 0.3;
+
+      if (suggestBreathing) {
+        setThoughtOverride(`Focused for ${Math.floor(focusDuration)}m! Your mind needs a reset. Try a breathing exercise? (Click me!) 🧘‍♂️`);
+      } else {
+        const prompt = getFocusPrompt();
+        const suggestions = [
+          `You've been focused for ${Math.floor(focusDuration)} minutes! Time for a quick break? ${prompt.text} 🚶‍♂️`,
+          `Deep focus detected! How about this exercise: ${prompt.text}? 🙆‍♂️`,
+          `${Math.floor(focusDuration)} minutes of hard work! ${prompt.text} would do wonders for your energy. 🏃‍♂️`,
+          `Great focus! ${prompt.text} - your pet is waiting! 🐉`,
+          `Time to un-hunch! ${prompt.text} will help you focus even better. ✨`,
+          `Focused for ${Math.floor(focusDuration)} minutes! ${prompt.text} to get the blood flowing! ⚡`,
+          `Your brain is working hard, now let's work those muscles! ${prompt.text}? 🚶‍♀️`,
+          `Break time! ${prompt.text}. 🔄`,
+          `Eyes need a break too! ${prompt.text}. 👀`,
+          `${Math.floor(focusDuration)} minutes down! ${prompt.text}! 🤸‍♂️`
+        ];
+        setThoughtOverride(suggestions[Math.floor(Math.random() * suggestions.length)]);
+      }
+
+      setLastSmartFocusBreak(focusDuration);
+
+      if (state === "idle") {
+        setState("thinking");
+      }
+
+      setTimeout(() => setThoughtOverride(null), 15000);
+    }
+  }, [focusDuration, smartFocusEnabled, lastSmartFocusBreak, smartFocusInterval, state, setState]);
+
+  // Check for calorie milestones
+  useEffect(() => {
+    const today = new Date();
+    const todayStr = today.toLocaleDateString();
+    if (lastUpdateDate !== todayStr) {
+      // Daily Login Bonus
+      if (lastUpdateDate !== "") {
+        setPetCoins(prev => prev + 25);
+
+        // Care Streak Logic: If average hunger, hydration, and energy were all > 50%
+        // If no samples were taken, we check current needs
+        const hasSamples = dailyNeedsAvg.samples > 0;
+        const avgHunger = hasSamples ? dailyNeedsAvg.hunger : hunger;
+        const avgHydration = hasSamples ? dailyNeedsAvg.hydration : hydration;
+        const avgEnergy = hasSamples ? dailyNeedsAvg.energy : (energy || 0);
+        
+        const wellCaredFor = avgHunger > 50 && avgHydration > 50 && avgEnergy > 50;
+        const newCareStreak = wellCaredFor ? careStreak + 1 : 0;
+        setCareStreak(newCareStreak);
+
+        // Yesterday's Summary - Modal
+        const stats = {
+          movements: dailyMovements,
+          calories: dailyCalories,
+          goalReached: dailyMovements >= dailyStreakGoal,
+          streak: streak,
+          careStreak: newCareStreak,
+          coinsEarned: 25 // Login bonus base
+        };
+        setYesterdayStats(stats);
+        setShowDailyRecap(true);
+
+        setTimeout(() => {
+          if (moodCategory === "joyful" || moodCategory === "content") {
+            addBuff('mood_boost', 30);
+            setThoughtOverride(`Good morning! I'm so happy to see you again! ☀️`);
+            setTimeout(() => setThoughtOverride(null), 5000);
+          }
+        }, 500);
+      }
+
+      setDailyMovements(0);
+      setDailyCalories(0);
+      setAppUsage({});
+      setGoalReachedToastShown(false);
+      setLastUpdateDate(todayStr);
+      setDailyNeedsAvg({ hunger: 0, hydration: 0, energy: 0, samples: 0 });
+      const dayIndex = today.getDay();
+      setWeeklyData(prev => {
+        const newData = [...prev];
+        newData[dayIndex] = { ...newData[dayIndex], moves: 0, calories: 0, avgMood: 0, moodSamples: 0 };
+        return newData;
+      });
+
+      // Daily Quest Refresh: Clear completed/expired quests and fill to 3
+      setActiveQuests(prev => {
+        // Remove completed quests on daily reset to make room for new ones
+        const remainingQuests = prev.filter(q => !q.completed);
+        const newQuests = [...remainingQuests];
+        
+        while (newQuests.length < 3) {
+          const existingIds = newQuests.map(q => q.templateId);
+          const newQuest = generateRandomQuest(existingIds);
+          if (newQuest) newQuests.push(newQuest);
+          else break;
+        }
+
+        return newQuests;
+      });
+    }
+  }, [lastUpdateDate, setDailyMovements, setDailyCalories, setGoalReachedToastShown, setLastUpdateDate, setWeeklyData, setActiveQuests, setPetCoins, moodCategory, addBuff, dailyMovements, dailyCalories, dailyStreakGoal, streak, setYesterdayStats, setShowDailyRecap, hunger, hydration, energy, careStreak, setCareStreak, dailyNeedsAvg, setDailyNeedsAvg, setAppUsage]);
+
+  // Check for level up
+  useEffect(() => {
+    if (petLevel > prevLevel) {
+      setShowLevelUp(true);
+      setPrevLevel(petLevel);
+      
+      // Level Up Reward: Give coins based on new level
+      setPetCoins(prev => prev + (petLevel * 10));
+      
+      // Record milestone
+      const evolution = petLevel >= 40 ? "Ancient" : petLevel >= 20 ? "Elder" : petLevel >= 10 ? "Great" : petLevel >= 5 ? "Teen" : "Baby";
+      const moment = petLevel >= 40 ? "👑" : petLevel >= 20 ? "👴" : petLevel >= 10 ? "🌟" : petLevel >= 5 ? "🔥" : "👶";
+      const newMilestone: Milestone = {
+        level: petLevel,
+        date: new Date().toISOString(),
+        description: `Reached Level ${petLevel}! ${petName} is now a ${evolution} pet.`,
+        moment
+      };
+      setMilestones(prev => [...prev, newMilestone]);
+    } else if (petLevel < prevLevel) {
+      setPrevLevel(petLevel);
+    }
+  }, [petLevel, prevLevel, setPrevLevel, petName, setMilestones, setPetCoins]);
+
+  // Check for friendship level up
+  useEffect(() => {
+    if (friendshipLevel > prevFriendshipLevel) {
+      setPrevFriendshipLevel(friendshipLevel);
+      setShowFriendshipLevelUp(true);
+      
+      const newMilestone: Milestone = {
+        level: petLevel,
+        date: new Date().toISOString(),
+        description: `Deepened bond to "${friendshipData.title}"! Our friendship is stronger than ever.`,
+        moment: "❤️"
+      };
+      setMilestones(prev => [...prev, newMilestone]);
+    } else if (friendshipLevel < prevFriendshipLevel) {
+      setPrevFriendshipLevel(friendshipLevel);
+    }
+  }, [friendshipLevel, prevFriendshipLevel, setPrevFriendshipLevel, petLevel, friendshipData.title, setMilestones]);
+
+  // Check for calorie milestones
+  useEffect(() => {
+    const nextMilestone = [1000, 2500, 5000, 7500, 10000, 15000, 20000, 30000, 40000, 50000]
+      .find(m => totalCalories >= m && !recordedCalorieMilestones.includes(m));
+
+    if (nextMilestone) {
+      setRecordedCalorieMilestones(prev => [...prev, nextMilestone]);
+      
+      const newMilestone: Milestone = {
+        level: petLevel,
+        date: new Date().toISOString(),
+        description: `Burned a total of ${nextMilestone} calories! We're becoming so fit and healthy together.`,
+        moment: "🏅"
+      };
+      setMilestones(prev => [...prev, newMilestone]);
+    }
+  }, [totalCalories, recordedCalorieMilestones, setRecordedCalorieMilestones, petLevel, setMilestones]);
+
+  // Check for care streak milestones
+  useEffect(() => {
+    const nextMilestone = [7, 14, 30, 60, 100, 200, 365]
+      .find(m => careStreak >= m && !recordedCareStreakMilestones.includes(m));
+
+    if (nextMilestone) {
+      setRecordedCareStreakMilestones(prev => [...prev, nextMilestone]);
+      
+      const newMilestone: Milestone = {
+        level: petLevel,
+        date: new Date().toISOString(),
+        description: `Maintained a ${nextMilestone}-day Care Streak! I'm so grateful for your consistent care.`,
+        moment: "🏅"
+      };
+      setMilestones(prev => [...prev, newMilestone]);
+    }
+  }, [careStreak, recordedCareStreakMilestones, setRecordedCareStreakMilestones, petLevel, setMilestones]);
+
+  // Check for goal reached
+  useEffect(() => {
+    if (dailyMovements >= dailyStreakGoal && !goalReachedToastShown) {
+      setShowGoalReached(true);
+      setGoalReachedToastShown(true);
+      
+      // Cosmic Nebula: Rare chance when reaching a Daily Goal
+      if (Math.random() < 0.1) {
+        unlockSpecies("cosmic_nebula");
+      }
+    }
+  }, [dailyMovements, dailyStreakGoal, goalReachedToastShown, setGoalReachedToastShown, unlockSpecies]);
+
+  // Theme effect
+  useEffect(() => {
+    const root = window.document.documentElement;
+    if (theme === "system") {
+      const systemTheme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+      root.classList.remove("light", "dark");
+      root.classList.add(systemTheme);
+    } else {
+      root.classList.remove("light", "dark");
+      root.classList.add(theme);
+    }
+  }, [theme]);
+
+  // Fetch devices
+  useEffect(() => {
+    const fetchDevices = async () => {
+      try {
+        await navigator.mediaDevices.getUserMedia({ video: true });
+        const allDevices = await navigator.mediaDevices.enumerateDevices();
+        const videoDevices = allDevices.filter(d => d.kind === "videoinput");
+        setDevices(videoDevices);
+      } catch (err) {
+        console.error("Error fetching devices:", err);
+      }
+    };
+    fetchDevices();
+  }, []);
+
+  // Hunger decrease effect
+  useEffect(() => {
+    const hungerTrainingBoost = 1 - (Math.min(0.5, (trainingLevels.hunger || 0) * 0.05));
+    const skillHungerResistance = 1 - getSkillMultiplier('hunger_resistance');
+    const interval = setInterval(() => {
+      setHunger(prev => Math.max(0, prev - (1 * personalityData.hungerModifier * hungerTrainingBoost * skillHungerResistance)));
+    }, 120000); // Decrease based on hungerModifier every 2 minutes
+    return () => clearInterval(interval);
+  }, [setHunger, personalityData.hungerModifier, trainingLevels.hunger, getSkillMultiplier]);
+
+  // Hydration decrease effect
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setHydration(prev => Math.max(0, prev - 2));
+    }, 90000); // Decrease by 2 every 1.5 minutes
+    return () => clearInterval(interval);
+  }, [setHydration]);
+
+  // Friendship decay if needs are neglected
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (hunger === 0 || hydration === 0 || energy === 0) {
+        boostFriendship(-0.5);
+      }
+    }, 60000); // Check every minute
+    return () => clearInterval(interval);
+  }, [hunger, hydration, energy, boostFriendship]);
+
+  // Update history, streak and hunger when a movement is completed
+  useEffect(() => {
+    if (showToast) {
+      setStreak(prev => prev + 1);
+      setTotalMovements(prev => prev + 1);
+      
+      const xpMultiplier = getMultiplier('xp_boost') * (1 + getSkillMultiplier('xp_boost'));
+      const coinMultiplier = getMultiplier('coin_magnet') * getMultiplier('coin_rain') * (1 + getSkillMultiplier('coin_boost'));
+      const friendshipMultiplier = 1 + getSkillMultiplier('friendship_boost');
+      const rarityMultiplier = personalityData.rarityModifier || 1.0;
+      const friendXPMultiplier = (activeFriend?.buffType === 'xp' ? activeFriend.buffValue : 1.0);
+      const friendCoinMultiplier = (activeFriend?.buffType === 'coins' ? activeFriend.buffValue : 1.0);
+
+      // Weather-based multipliers
+      let weatherXPMultiplier = 1.0;
+      let weatherCoinMultiplier = 1.0;
+      if (weather?.condition === "sunny") {
+        weatherCoinMultiplier = 1.2; // Sunny days give more coins
+      } else if (weather?.condition === "rainy") {
+        weatherXPMultiplier = 1.2; // Rainy days give more XP
+      } else if (weather?.condition === "snowy") {
+        weatherXPMultiplier = 1.5;
+        weatherCoinMultiplier = 1.2;
+      }
+
+      // Seasonal multipliers
+      let seasonXPMultiplier = 1.0;
+      let seasonCoinMultiplier = 1.0;
+      if (season === "spring") {
+        seasonXPMultiplier = 1.1; // Spring growth
+      } else if (season === "summer") {
+        seasonCoinMultiplier = 1.1; // Summer fun
+      } else if (season === "autumn") {
+        seasonXPMultiplier = 1.2; // Harvest season
+      } else if (season === "winter") {
+        seasonXPMultiplier = 0.9; // Tougher in winter
+      }
+
+      // Training multipliers
+      const trainingXPMultiplier = 1 + ((trainingLevels.xp || 0) * 0.05);
+      const trainingCoinMultiplier = 1 + ((trainingLevels.coins || 0) * 0.05);
+
+      // Background multipliers
+      const backgroundXPMultiplier = (activeBackground.buff?.type === 'xp' ? activeBackground.buff.value : 1.0);
+      const backgroundCoinMultiplier = (activeBackground.buff?.type === 'coins' ? activeBackground.buff.value : 1.0);
+      const focusZenMultiplier = hasBuff('focus_zen') ? getMultiplier('focus_zen') : 1.0;
+      const restedBonusMultiplier = hasBuff('rested_bonus') ? getMultiplier('rested_bonus') : 1.0;
+
+      const modifiedXP = Math.round(calories * personalityData.xpModifier * xpMultiplier * rarityMultiplier * weatherXPMultiplier * seasonXPMultiplier * friendXPMultiplier * trainingXPMultiplier * backgroundXPMultiplier * friendshipData.multiplier * happinessMultiplier * focusZenMultiplier * restedBonusMultiplier);
+      const modifiedCoins = Math.round(Math.max(1, Math.floor(calories / 2)) * personalityData.coinModifier * coinMultiplier * rarityMultiplier * weatherCoinMultiplier * seasonCoinMultiplier * friendCoinMultiplier * trainingCoinMultiplier * backgroundCoinMultiplier * friendshipData.multiplier * happinessMultiplier * focusZenMultiplier * restedBonusMultiplier);
+      if (activeTraining) {
+        const type = activeTraining;
+        setTrainingLevels(prev => ({
+          ...prev,
+          [type]: (prev[type] || 0) + 1
+        }));
+        setActiveTraining(null);
+        setThoughtOverride(`Training complete! My ${type.toUpperCase()} skills improved! 🎓`);
+        setTimeout(() => setThoughtOverride(null), 4000);
+      }
+
+      setTotalCalories(prev => prev + modifiedXP);
+      setDailyMovements(prev => prev + 1);
+      setDailyCalories(prev => prev + modifiedXP);
+      setPetCoins(prev => prev + modifiedCoins);
+      boostFriendship(3 * friendshipMultiplier); // Friendship boost for activity
+      setHunger(prev => Math.min(100, prev + (10 * personalityData.hungerModifier))); // Increase hunger based on modifier
+      checkSpeciesUnlocks({
+        totalMoves: totalMovements + 1,
+        totalCal: totalCalories + modifiedXP,
+        streak: streak + 1,
+        level: petLevel,
+        caloriesThisMove: calories,
+        currentSeason: season,
+        currentWeather: weather?.condition,
+        strengthLevel: trainingLevels.strength || 0
+        });
+      const dayIndex = new Date().getDay();
+      setWeeklyData(prev => {
+        const newData = [...prev];
+        newData[dayIndex] = { 
+          ...newData[dayIndex], 
+          moves: newData[dayIndex].moves + 1, 
+          calories: newData[dayIndex].calories + modifiedXP 
+        };
+        return newData;
+      });
+
+      setHistory(prev => [
+        { 
+          id: Date.now().toString(), 
+          date: new Date().toLocaleTimeString(), 
+          calories: modifiedXP, 
+          duration: lastMoveDuration 
+        },
+        ...prev.slice(0, 4)
+      ]);
+
+      // Update quest progress
+      setActiveQuests(prev => prev.map(quest => {
+        if (quest.completed) return quest;
+        
+        let newValue = quest.currentValue;
+        if (quest.targetType === "movement") {
+          // Special case for weather-specific movement quests
+          if (quest.templateId === "snowy_quest" && weather?.condition !== "snowy") {
+            return quest;
+          }
+          newValue += 1;
+        } else if (quest.targetType === "calories") {
+          // Special case for rainy resilience quest
+          if (quest.templateId === "rainy_resilience" && weather?.condition !== "rainy") {
+            return quest;
+          }
+          // Special case for summer sizzle quest
+          if (quest.templateId === "summer_sizzle" && season !== "summer") {
+            return quest;
+          }
+          newValue += calories;
+        }
+
+        const completed = newValue >= quest.targetValue;
+        return { 
+          ...quest, 
+          currentValue: newValue, 
+          completed,
+          completedAt: completed ? new Date().toISOString() : undefined
+        };
+      }));
+
+      // Random Gift Discovery (20% base chance, 40% if treasure hunt is active)
+      const giftChance = hasBuff('treasure_hunt') ? 0.40 : 0.20;
+      if (Math.random() < giftChance) {
+        // Exclude special items like Mystery Box or very expensive items from simple discovery
+        const discoverableItems = ITEMS.filter(item => 
+          item.type !== 'special' && 
+          item.price <= 100
+        );
+        
+        if (discoverableItems.length > 0) {
+          const randomItem = discoverableItems[Math.floor(Math.random() * discoverableItems.length)];
+          
+          setInventory(prev => ({
+            ...prev,
+            [randomItem.id]: (prev[randomItem.id] || 0) + 1
+          }));
+
+          // Track gift discovery quest progress if any
+          setActiveQuests(prev => prev.map(quest => {
+            if (quest.completed || quest.targetType !== "items") return quest;
+            
+            // Special case for autumn harvest quest
+            if (quest.templateId === "autumn_harvest" && season !== "autumn") return quest;
+
+            const newValue = quest.currentValue + 1;
+            const completed = newValue >= quest.targetValue;
+            return { 
+              ...quest, 
+              currentValue: newValue, 
+              completed,
+              completedAt: completed ? new Date().toISOString() : undefined
+            };
+          }));
+
+          setFoundGift(randomItem);
+        }
+      }
+
+      // Random Event: Treasure Hunt (5% chance when moving, if not already active)
+      if (!hasBuff('treasure_hunt') && Math.random() < 0.05) {
+        addBuff('treasure_hunt', 60);
+        setThoughtOverride("Ooh! I feel lucky! Let's find some treasures! 💎");
+        setTimeout(() => setThoughtOverride(null), 5000);
+      }
+
+      // Random Event: Energy Surge (5% chance when moving, if not already active)
+      if (!hasBuff('energy_surge') && Math.random() < 0.05) {
+        addBuff('energy_surge', 30);
+        setThoughtOverride("I feel a surge of energy! I won't get tired for a while! ⚡");
+        setTimeout(() => setThoughtOverride(null), 5000);
+      }
+
+      // Random Event: Mood Boost (5% chance when moving, if not already active)
+      if (!hasBuff('mood_boost') && Math.random() < 0.05) {
+        addBuff('mood_boost', 60);
+        setThoughtOverride("I'm feeling extra joyful! Nothing can ruin my mood! 🌟");
+        setTimeout(() => setThoughtOverride(null), 5000);
+      }
+
+      // Random Event: Coin Rain (5% chance when moving, if not already active)
+      if (!hasBuff('coin_rain') && Math.random() < 0.05) {
+        addBuff('coin_rain', 15, 2);
+        setThoughtOverride("Is it raining coins? Everything gives double rewards! 🌧️💰");
+        setTimeout(() => setThoughtOverride(null), 5000);
+      }
+
+      // Random Friend Discovery (5% chance)
+      if (Math.random() < 0.05 && !activeFriend) {
+        const friend = meetFriend();
+        setFoundFriend(friend);
+        setThoughtOverride(friend.thought);
+        setTimeout(() => setThoughtOverride(null), 8000);
+      }
+    }
+  }, [showToast, calories, lastMoveDuration, setStreak, setTotalMovements, setTotalCalories, setDailyMovements, setDailyCalories, setHistory, setWeeklyData, setActiveQuests, setInventory, setThoughtOverride, setFoundGift, personalityData, weather, season, totalMovements, totalCalories, streak, petLevel, checkSpeciesUnlocks, hasBuff, getMultiplier, activeFriend, meetFriend, addBuff, getSkillMultiplier]);
+
+  // Quest progress for time-based quests
+  useEffect(() => {
+    const timeBasedQuests = activeQuests.filter(q => !q.completed && q.targetType === "time");
+    if (timeBasedQuests.length > 0) {
+      let interval: any;
+      if (isMoving && motionScore > motionThreshold) {
+        interval = setInterval(() => {
+          setActiveQuests(prev => prev.map(quest => {
+            if (quest.completed || quest.targetType !== "time") return quest;
+            
+            // Special case for sunny stroll quest
+            if (quest.templateId === "sunny_stroll" && weather?.condition !== "sunny") return quest;
+
+            const movementEfficiency = 1 + getSkillMultiplier('movement_efficiency');
+            const newValue = quest.currentValue + (1 * movementEfficiency);
+            const completed = newValue >= quest.targetValue;
+            return { 
+              ...quest, 
+              currentValue: newValue, 
+              completed,
+              completedAt: completed ? new Date().toISOString() : undefined
+            };
+          }));
+        }, 1000);
+      }
+      return () => clearInterval(interval);
+    }
+  }, [isMoving, motionScore, motionThreshold, activeQuests, setActiveQuests, weather, getSkillMultiplier]);
+
+  // Quest progress for sleep-based quests
+  useEffect(() => {
+    const sleepQuests = activeQuests.filter(q => !q.completed && q.targetType === "sleep");
+    if (sleepQuests.length > 0 && isResting) {
+      const interval = setInterval(() => {
+        setActiveQuests(prev => prev.map(quest => {
+          if (quest.completed || quest.targetType !== "sleep") return quest;
+
+          // Special case for winter warmth quest
+          if (quest.templateId === "winter_warmth" && season !== "winter") return quest;
+
+          const newValue = quest.currentValue + 1;
+          const completed = newValue >= quest.targetValue;
+          return { 
+            ...quest, 
+            currentValue: newValue, 
+            completed,
+            completedAt: completed ? new Date().toISOString() : undefined
+          };
+        }));
+      }, 1000);
+      return () => clearInterval(interval);
+    }
+  }, [isResting, activeQuests, setActiveQuests, season]);
+
+  const handleClaimQuestReward = (questId: string) => {
+    const quest = activeQuests.find(q => q.id === questId);
+    if (quest && quest.completed) {
+      setPetCoins(prev => prev + quest.rewardCoins);
+      setTotalCalories(prev => prev + quest.rewardXP);
+      setDailyCalories(prev => prev + quest.rewardXP);
+      
+      // Save to history before removing from active
+      const completedQuest: CompletedQuest = {
+        ...quest,
+        claimed: true,
+        completedAt: quest.completedAt || new Date().toISOString()
+      };
+      setQuestHistory(prev => [completedQuest, ...prev].slice(0, 50));
+      
+      setActiveQuests(prev => prev.filter(q => q.id !== questId));
+      if (soundEnabled) playChirp();
+    }
+  };
+
+  const handleGetNewQuest = () => {
+    if (activeQuests.length < 3) {
+      const existingIds = activeQuests.map(q => q.templateId);
+      setActiveQuests(prev => [...prev, generateRandomQuest(existingIds)]);
+    }
+  };
+
+  const handleRerollQuest = (questId: string) => {
+    if (petCoins >= 20) {
+      setPetCoins(prev => prev - 20);
+      const existingTemplateIds = activeQuests.map(q => q.templateId);
+      setActiveQuests(prev => prev.map(q => 
+        q.id === questId ? generateRandomQuest(existingTemplateIds) : q
+      ));
+      if (soundEnabled) playChirp();
+    } else {
+      alert("Not enough Pet Coins! You need 20 coins to reroll a quest.");
+    }
+  };
+
+  const handleUseItem = (itemId: string) => {
+    const item = ITEMS.find(i => i.id === itemId);
+    const count = inventory[itemId] || 0;
+
+    if (item && count > 0) {
+      if (soundEnabled) playItemUse();
+      // Apply effects
+      if (item.effect.hunger) setHunger(prev => Math.min(100, prev + item.effect.hunger!));
+      if (item.effect.energy) setEnergy(prev => Math.min(100, prev + item.effect.energy!));
+      if (item.effect.mood) boostMood(item.effect.mood);
+      if (item.effect.xp) setTotalCalories(prev => prev + item.effect.xp!);
+      if (item.effect.buff) {
+        addBuff(item.effect.buff.id, item.effect.buff.duration, item.effect.buff.value || 1);
+      }
+
+      if (item.type === 'training' && item.effect.training) {
+        if (activeTraining) {
+          alert(`Already training ${activeTraining}! Complete the current session first.`);
+          return;
+        }
+        setActiveTraining(item.effect.training);
+      }
+
+      let feedback = `Mmm, ${item.name}!`;
+
+      // Special: Mystery Box
+      if (itemId === 'mystery_box') {
+        const roll = Math.random();
+        if (roll > 0.8) {
+          const reward = 200;
+          setPetCoins(prev => prev + reward);
+          feedback = `🎁 Found ${reward} coins!`;
+        } else if (roll > 0.5) {
+          setTotalCalories(prev => prev + 100);
+          feedback = "🎁 That's a lot of XP!";
+        } else {
+          feedback = "🎁 Oh, it was empty...";
+        }
+      }
+
+      // Update inventory
+      setInventory(prev => ({
+        ...prev,
+        [itemId]: count - 1
+      }));
+
+      // Update quest progress
+      setActiveQuests(prev => prev.map(quest => {
+        if (quest.completed || quest.targetType !== "items") return quest;
+        const newValue = quest.currentValue + 1;
+        const completed = newValue >= quest.targetValue;
+        return { 
+          ...quest, 
+          currentValue: newValue, 
+          completed,
+          completedAt: completed ? new Date().toISOString() : undefined
+        };
+      }));
+
+      if (soundEnabled) playChirp();
+    }
+  };
+
+  const handleBuyConsumable = (itemId: string) => {
+    const item = ITEMS.find(i => i.id === itemId);
+    if (item && petCoins >= item.price) {
+      setPetCoins(prev => prev - item.price);
+      setInventory(prev => ({
+        ...prev,
+        [itemId]: (prev[itemId] || 0) + 1
+      }));
+
+      // Update shopping quest progress
+      setActiveQuests(prev => prev.map(quest => {
+        if (quest.completed || quest.targetType !== "shopping") return quest;
+        const newValue = quest.currentValue + 1;
+        const completed = newValue >= quest.targetValue;
+        return { 
+          ...quest, 
+          currentValue: newValue, 
+          completed,
+          completedAt: completed ? new Date().toISOString() : undefined
+        };
+      }));
+
+      if (soundEnabled) playChirp();
+    } else if (item) {
+      alert(`Not enough Pet Coins! You need ${item.price} coins.`);
+    }
+  };
+
+  const handleCosmeticBought = () => {
+    // Update shopping quest progress
+    setActiveQuests(prev => prev.map(quest => {
+      if (quest.completed || quest.targetType !== "shopping") return quest;
+      const newValue = quest.currentValue + 1;
+      const completed = newValue >= quest.targetValue;
+      return { 
+        ...quest, 
+        currentValue: newValue, 
+        completed,
+        completedAt: completed ? new Date().toISOString() : undefined
+      };
+    }));
+    if (soundEnabled) playChirp();
+  };
+
+  useEffect(() => {
+    if (totalMovements >= 1) unlockAchievement("first_steps");
+    if (totalMovements >= 50) unlockAchievement("move_master");
+    if (totalCalories >= 100) unlockAchievement("calorie_burner");
+    if (totalCalories >= 500) unlockAchievement("calorie_crusader");
+    if (totalCalories >= 1000) unlockAchievement("master_burner");
+    if (streak >= 3) unlockAchievement("on_a_roll");
+    if (streak >= 7) unlockAchievement("consistency_king");
+    if (streak >= 14) unlockAchievement("consistent_mover");
+    if (petLevel >= 5) unlockAchievement("level_5");
+    if (careStreak >= 3) unlockAchievement("care_taker");
+    if (careStreak >= 7) unlockAchievement("devoted_guardian");
+    if (careStreak >= 15) unlockAchievement("nurturing_spirit");
+    if (careStreak >= 30) unlockAchievement("soul_nurturer");
+    if (careStreak >= 100) unlockAchievement("master_caregiver");
+    if (happiness >= 90) unlockAchievement("pure_joy");
+    if (happiness >= 100) unlockAchievement("sunshine_soul");
+
+    const careScore = (hunger + hydration + (energy || 0)) / 3;
+    if (careScore >= 70) unlockAchievement("balanced_life");
+    if (careScore >= 90) unlockAchievement("peak_health");
+
+    if (petDreams.length >= 10) {
+      if (unlockAchievement("dream_weaver")) {
+        const newMilestone: Milestone = {
+          level: petLevel,
+          date: new Date().toISOString(),
+          description: "Became a 'Dream Weaver' by recording 10 pet dreams!",
+          moment: "☁️"
+        };
+        setMilestones(prev => [...prev, newMilestone]);
+      }
+    }
+
+    // Birthday check (Adoption Anniversary)
+    if (adoptionDate) {
+      const adoption = new Date(adoptionDate);
+      const today = new Date();
+      const isAnniversary = adoption.getMonth() === today.getMonth() && 
+                            adoption.getDate() === today.getDate() &&
+                            adoption.getFullYear() < today.getFullYear();
+      
+      if (isAnniversary) {
+        if (unlockAchievement("birthday_bash")) {
+          const years = today.getFullYear() - adoption.getFullYear();
+          const newMilestone: Milestone = {
+            level: petLevel,
+            date: new Date().toISOString(),
+            description: `Celebrated our ${years} year adoption anniversary! Happy Birthday, ${petName}! 🎂`,
+            moment: "🎂"
+          };
+          setMilestones(prev => [...prev, newMilestone]);
+        }
+      }
+    }
+  }, [totalMovements, totalCalories, streak, petLevel, careStreak, happiness, hunger, hydration, energy, petDreams.length, setMilestones, adoptionDate, petName]);
+
+  const shareProgress = () => {
+    setShowShareGenerator(true);
+  };
+
+  const handleUnlockSkill = (skillId: string) => {
+    const result = unlockSkill(skillId, petLevel, petCoins);
+    if (result.success) {
+      const skill = SKILLS.find(s => s.id === skillId);
+      if (skill) {
+        setPetCoins(prev => prev - skill.cost);
+        if (soundEnabled) playChirp();
+        setThoughtOverride(`I learned a new skill: ${skill.name}! 🌟`);
+        setTimeout(() => setThoughtOverride(null), 4000);
+      }
+    } else if (result.error) {
+      setThoughtOverride(`I can't learn that yet: ${result.error} ❌`);
+      setTimeout(() => setThoughtOverride(null), 4000);
+    }
+  };
+
+  const toggleAccessory = (id: string) => {
+    setEnabledAccessories(prev => ({
+      ...prev,
+      [id]: !prev[id]
+    }));
+  };
+
+  const handleEmergencyEscape = () => {
+    setStrictMode(false);
+    reset();
+  };
+
+  const handleAddDiaryEntry = (text: string, mood: string) => {
+    const newEntry: DiaryEntry = {
+      id: Date.now().toString(),
+      date: new Date().toISOString(),
+      text,
+      mood,
+      level: petLevel
+    };
+    setDiaryEntries(prev => [newEntry, ...prev]);
+    
+    // Achievement: First entry
+    if (diaryEntries.length === 0) {
+      unlockAchievement("diary_keeper");
+    }
+  };
+
+  const handleDeleteDiaryEntry = (id: string) => {
+    setDiaryEntries(prev => prev.filter(entry => entry.id !== id));
+  };
+
+  const feedPet = () => {
+    if (hunger < 100) {
+      setHunger(prev => Math.min(100, prev + 30));
+      setTotalCalories(prev => prev + 5); // 5 XP boost
+      boostMood(15);
+      boostFriendship(5); // Feeding boosts friendship
+      unlockAchievement("pet_lover");
+      if (soundEnabled) playChirp();
+
+      // Update quest progress
+      setActiveQuests(prev => prev.map(quest => {
+        if (quest.completed || quest.targetType !== "maintenance" || quest.templateId !== "well_fed") return quest;
+        const newValue = quest.currentValue + 1;
+        const completed = newValue >= quest.targetValue;
+        return {
+          ...quest,
+          currentValue: newValue,
+          completed,
+          completedAt: completed ? new Date().toISOString() : undefined
+        };
+      }));
+    }
+  };
+
+  const drinkWater = () => {
+    if (hydration < 100) {
+      setHydration(prev => Math.min(100, prev + 30));
+      boostMood(10);
+      boostFriendship(2);
+      unlockAchievement("stay_hydrated");
+      if (soundEnabled) playChirp();
+
+
+      // Update quest progress
+      setActiveQuests(prev => prev.map(quest => {
+        if (quest.completed || quest.targetType !== "maintenance" || quest.templateId !== "stay_hydrated") return quest;
+        const newValue = quest.currentValue + 1;
+        const completed = newValue >= quest.targetValue;
+        return { 
+          ...quest, 
+          currentValue: newValue, 
+          completed,
+          completedAt: completed ? new Date().toISOString() : undefined
+        };
+      }));
+    }
+  };
+
+  // Happiness decay/growth logic
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setHappiness(prev => {
+        let change = 0;
+        
+        // Base growth if mood is high and needs are met
+        if (moodCategory === "joyful" && hunger > 80 && hydration > 80 && energy > 80) {
+          change += 0.5;
+        } else if (moodCategory === "content" || moodCategory === "joyful") {
+          change += 0.2;
+        } else if (moodCategory === "grumpy") {
+          change -= 0.3;
+        }
+
+        // Penalty for zero needs
+        if (hunger === 0 || hydration === 0 || energy === 0) {
+          change -= 1;
+        }
+
+        return Math.min(100, Math.max(0, prev + change));
+      });
+    }, 60000); // Update every minute
+
+    return () => clearInterval(interval);
+  }, [moodCategory, hunger, hydration, energy, setHappiness]);
+
+  const happinessMultiplier = 1 + (happiness / 100) * 0.25; // Up to 25% bonus at 100 happiness
+
+  const handlePet = () => {
+    const friendshipMultiplier = 1 + getSkillMultiplier('friendship_boost');
+    boostMood(0.5); // Small boost while petting
+    boostFriendship(0.1 * friendshipMultiplier); // Petting slowly builds friendship
+    if (Math.random() > 0.95) {
+      setPetCoins(prev => prev + 1); // Rare petting bonus coin
+    }
+
+    if (weather?.condition === "rainy") {
+      setThoughtOverride("A bit damp, but I'm happy! ☔");
+    } else if (weather?.condition === "sunny") {
+      setThoughtOverride("The sun feels so good! ☀️");
+    } else if (weather?.condition === "snowy") {
+      setThoughtOverride("So cold, but your touch is warm! ❄️");
+    } else if (weather?.condition === "cloudy") {
+      setThoughtOverride("Even on cloudy days, you make me smile! 🌥️");
+    }
+    setTimeout(() => setThoughtOverride(null), 4000);
+
+    // Update quest progress
+    setActiveQuests(prev => prev.map(quest => {
+      if (quest.completed || quest.targetType !== "interactions") return quest;
+
+      // Special case for cloudy comfort quest
+      if (quest.templateId === "cloudy_comfort" && weather?.condition !== "cloudy") return quest;
+
+      const newValue = quest.currentValue + 1;
+      const completed = newValue >= quest.targetValue;
+      return { ...quest, currentValue: newValue, completed };
+    }));
+  };
+
+  const handlePoke = () => {
+    boostMood(-15);
+    boostFriendship(-2);
+    if (isResting) setIsResting(false);
+
+    // Update quest progress
+    setActiveQuests(prev => prev.map(quest => {
+      if (quest.completed || quest.targetType !== "interactions") return quest;
+
+      // Special case for cloudy comfort quest
+      if (quest.templateId === "cloudy_comfort" && weather?.condition !== "cloudy") return quest;
+
+      const newValue = quest.currentValue + 1;
+      const completed = newValue >= quest.targetValue;
+      return { ...quest, currentValue: newValue, completed };
+    }));
+  };
+
+  const handleThoughtClick = () => {
+    if (thoughtOverride?.includes("breathing exercise")) {
+      setShowBreathing(true);
+      setThoughtOverride(null);
+    } else {
+      setThoughtOverride(null);
+    }
+  };
+
+  const handleStatBoost = (type: 'mood' | 'friendship' | 'coins' | 'xp') => {
+    if (type === 'mood') boostMood(5);
+    if (type === 'friendship') boostFriendship(1);
+    if (type === 'coins') setPetCoins(prev => prev + 5);
+    if (type === 'xp') {
+      setTotalCalories(prev => prev + 10);
+      setDailyCalories(prev => prev + 10);
+    }
+  };
+
+  const handleChat = () => {
+    const friendshipMultiplier = 1 + getSkillMultiplier('friendship_boost');
+    setShowConversation(true);
+    setState("chatting");
+    boostMood(5);
+    boostFriendship(2 * friendshipMultiplier); // Talking builds friendship
+    setPetCoins(prev => prev + 2); // Talking gives a few coins
+    
+    // Update quest progress
+    setActiveQuests(prev => prev.map(quest => {
+      if (quest.completed || quest.targetType !== "chat") return quest;
+
+      // Special case for spring bloom quest
+      if (quest.templateId === "spring_bloom" && season !== "spring") return quest;
+
+      const newValue = quest.currentValue + 1;
+      const completed = newValue >= quest.targetValue;
+      return { 
+        ...quest, 
+        currentValue: newValue, 
+        completed,
+        completedAt: completed ? new Date().toISOString() : undefined
+      };
+    }));
+
+    if (soundEnabled) playChirp();
+  };
+
+  const toggleRest = () => {
+    setIsResting(!isResting);
+    if (soundEnabled && !isResting) {
+      playChirp();
+    }
+  };
+
+  // Rested bonus logic
+  useEffect(() => {
+    if (!isResting && energy >= 100) {
+      // Check if we were just resting (previous state)
+      // Since we don't have previous state easily here, we'll use a ref or just rely on the energy level
+      // Actually, if we are not resting and energy is 100, we check if we have the buff
+      if (!hasBuff('rested_bonus')) {
+        addBuff('rested_bonus', 60, 1.2);
+        setThoughtOverride("I feel so well-rested and full of energy! Let's make the most of it! 💤✨");
+        setTimeout(() => setThoughtOverride(null), 5000);
+      }
+    }
+  }, [isResting, energy, hasBuff, addBuff]);
+
+  // Auto-sleep schedule effect
+  useEffect(() => {
+    if (!sleepScheduleEnabled) return;
+
+    const checkSchedule = () => {
+      const now = new Date();
+      const hours = now.getHours();
+      const minutes = now.getMinutes();
+      const currentTimeStr = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+      
+      const shouldBeSleeping = isWithinWindow(currentTimeStr, bedtime, wakeTime);
+      
+      if (shouldBeSleeping && !isResting) {
+        setIsResting(true);
+      } else if (!shouldBeSleeping && isResting) {
+        // Only auto-wake if energy is high enough, or it's exactly wake time
+        // For now, let's just auto-wake at wake time
+        if (currentTimeStr === wakeTime) {
+          setIsResting(false);
+        }
+      }
+    };
+
+    checkSchedule();
+    const interval = setInterval(checkSchedule, 60000); // Check every minute
+    return () => clearInterval(interval);
+  }, [sleepScheduleEnabled, bedtime, wakeTime, isResting]);
+
+  // Auto-wake up when energy is full (if not in sleep window)
+  useEffect(() => {
+    if (isResting && energy >= 100) {
+      const now = new Date();
+      const hours = now.getHours();
+      const minutes = now.getMinutes();
+      const currentTimeStr = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+      
+      if (!isWithinWindow(currentTimeStr, bedtime, wakeTime)) {
+        setIsResting(false);
+      }
+    }
+  }, [isResting, energy, bedtime, wakeTime]);
+
+  // Mood and Needs sampling for history
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const today = new Date().getDay();
+      
+      // Update mood average
+      setWeeklyData(prev => {
+        const newData = [...prev];
+        const current = newData[today];
+        const currentSamples = current.moodSamples || 0;
+        const currentAvg = current.avgMood || 0;
+        
+        newData[today] = {
+          ...current,
+          avgMood: ((currentAvg * currentSamples) + moodScore) / (currentSamples + 1),
+          moodSamples: currentSamples + 1
+        };
+        return newData;
+      });
+
+      // Update daily needs average
+      setDailyNeedsAvg(prev => ({
+        hunger: ((prev.hunger * prev.samples) + hunger) / (prev.samples + 1),
+        hydration: ((prev.hydration * prev.samples) + hydration) / (prev.samples + 1),
+        energy: ((prev.energy * prev.samples) + (energy || 0)) / (prev.samples + 1),
+        samples: prev.samples + 1
+      }));
+    }, 600000); // Sample every 10 minutes
+    return () => clearInterval(interval);
+  }, [moodScore, hunger, hydration, energy, setWeeklyData, setDailyNeedsAvg, setAppUsage]);
+
+  // Track rest duration for achievement
+  useEffect(() => {
+    if (isResting) {
+      if (!restStartTime) {
+        setRestStartTime(Date.now());
+      } else {
+        const restDuration = (Date.now() - restStartTime) / 1000 / 60; // in minutes
+        if (restDuration >= 5) {
+          unlockAchievement("deep_sleep");
+        }
+      }
+    } else {
+      setRestStartTime(null);
+    }
+  }, [isResting, restStartTime, unlockAchievement]);
+
+  // Check for well-rested achievement
+  useEffect(() => {
+    if (energy >= 100) {
+      unlockAchievement("well_rested");
+    }
+  }, [energy, unlockAchievement]);
+
+  useEffect(() => {
+    if (friendshipLevel >= 2) unlockAchievement("new_friend");
+    if (friendshipLevel >= 4) unlockAchievement("best_friends");
+    if (friendshipLevel >= 5) unlockAchievement("soulmate");
+  }, [friendshipLevel]);
+
+  return (
+    <main className={`container ${activeBackground.className} ${state === "floating" ? "floating-mode" : ""}`}>
+      <h1>Move Pet Prototype</h1>
+
+      <StrictModeOverlay 
+        isActive={isLocked} 
+        onEscape={handleEmergencyEscape} 
+      />
+
+      {showToast && (
+        <VictoryToast 
+          calories={calories} 
+          durationSeconds={lastMoveDuration}
+          intensity={averageIntensity}
+          onClose={() => setShowToast(false)} 
+        />
+      )}
+
+      {showLevelUp && (
+        <LevelUpToast 
+          level={petLevel} 
+          onClose={() => setShowLevelUp(false)} 
+        />
+      )}
+
+      {showFriendshipLevelUp && (
+        <FriendshipLevelUpToast
+          title={friendshipData.title}
+          multiplier={friendshipData.multiplier}
+          onClose={() => setShowFriendshipLevelUp(false)}
+        />
+      )}
+
+      {showGoalReached && (
+        <GoalReachedToast 
+          goal={dailyGoal} 
+          onClose={() => setShowGoalReached(false)} 
+        />
+      )}
+
+      {showConversation && (
+        <PetConversation
+          personality={personality}
+          petName={petName}
+          onClose={() => {
+            setShowConversation(false);
+            setState("idle");
+          }}
+          onStatBoost={handleStatBoost}
+        />
+      )}
+
+      {showJournal && (
+        <PetJournal
+          level={petLevel}
+          xp={totalCalories % 50}
+          nextLevelXp={50}
+          adoptionDate={adoptionDate}
+          milestones={milestones}
+          unlockedAchievements={unlockedAchievements}
+          friendshipData={friendshipData}
+          diaryEntries={diaryEntries}
+          petDreams={petDreams}
+          onAddDiaryEntry={handleAddDiaryEntry}
+          onDeleteDiaryEntry={handleDeleteDiaryEntry}
+          currentMood={moodCategory}
+          dailyNeedsAvg={dailyNeedsAvg}
+          weeklyData={weeklyData}
+          appUsage={appUsage}
+          onOpenCollection={() => {
+            setShowJournal(false);
+            setShowCollection(true);
+          }}
+          onClose={() => setShowJournal(false)}
+        />
+      )}
+
+      {showAppUsageReport && (
+        <AppUsageReport
+          appUsage={appUsage}
+          onClose={() => setShowAppUsageReport(false)}
+        />
+      )}
+      {recentAchievement && (
+        <AchievementToast
+          title={recentAchievement.title}
+          description={recentAchievement.description}
+          icon={recentAchievement.icon}
+          onClose={() => setRecentAchievement(null)}
+        />
+      )}
+
+      {showQuestJournal && (
+        <QuestJournal
+          quests={activeQuests}
+          history={questHistory}
+          onClaimReward={handleClaimQuestReward}
+          onNewQuest={handleGetNewQuest}
+          onRerollQuest={handleRerollQuest}
+          onClose={() => setShowQuestJournal(false)}
+        />
+      )}
+
+      {showSkillTree && (
+        <SkillTree
+          unlockedSkills={unlockedSkills}
+          currentLevel={petLevel}
+          currentCoins={petCoins}
+          onUnlock={handleUnlockSkill}
+          onClose={() => setShowSkillTree(false)}
+        />
+      )}
+
+      {showCollection && (
+        <Collection
+          unlockedSpecies={unlockedSpecies}
+          recentlyDiscovered={recentlyDiscoveredSpecies}
+          onClose={() => setShowCollection(false)}
+        />
+      )}
+
+      <div className="status-panel">
+        <div className="status-item privacy-indicator">
+          <span className="dot active"></span>
+          <strong>Private Processing:</strong> No video ever leaves this device.
+        </div>
+        <div className="status-item">
+          Inactivity: <strong className={isInactive ? "text-danger" : "text-success"}>
+            {isInactive ? "Inactive" : "Active"}
+          </strong>
+        </div>
+        <div className="status-item">
+          Webcam Motion: <strong className={isMoving ? "text-success" : ""}>
+            {motionScore}%
+          </strong>
+          <div className="motion-meter">
+            <div 
+              className="motion-meter-threshold" 
+              style={{ left: `${motionThreshold}%` }}
+              title={`Threshold: ${motionThreshold}%`}
+            />
+            <div 
+              className="motion-meter-fill" 
+              style={{ 
+                width: `${Math.min(motionScore, 100)}%`,
+                backgroundColor: isMoving ? "#2ecc71" : "#3498db"
+              }} 
+            />
+          </div>
+          {hasPermission === false && <span className="text-danger"> (No Permission)</span>}
+          {hasPermission === null && <span> (Requesting...)</span>}
+        </div>
+        {state === "disturbed" && movementDuration > 0 && (
+          <div className="status-item">
+            Movement Progress: <progress value={movementDuration} max={targetDuration} />
+          </div>
+        )}
+        <div className="status-item">
+          Streak: <strong className="text-success">{streak} 🔥</strong>
+        </div>
+
+        {foundGift && (
+          <GiftToast 
+            itemName={foundGift.name} 
+            itemIcon={foundGift.icon} 
+            onClose={() => setFoundGift(null)} 
+          />
+        )}
+
+        {foundFriend && (
+          <FriendToast 
+            friend={foundFriend} 
+            onClose={() => setFoundFriend(null)} 
+          />
+        )}
+
+        {showBreathing && (
+          <BreathingExercise 
+            onClose={() => setShowBreathing(false)}
+            onComplete={(cycles: number) => {
+              // Could add a mood/energy boost here if needed
+              setEnergy(prev => Math.min(100, prev + cycles * 5));
+              setMood(prev => Math.min(100, prev + cycles * 5));
+              setShowBreathing(false);
+            }}
+          />
+        )}
+
+        {showDailyRecap && (
+          <DailyRecap
+            isOpen={showDailyRecap}
+            onClose={() => setShowDailyRecap(false)}
+            onShare={() => setShowShareGenerator(true)}
+            petName={petName}
+            personalityName={personalityData.name}
+            stats={yesterdayStats}
+            recapText={
+              yesterdayStats.goalReached
+                ? personalityData.thoughts.recap.good[Math.floor(Math.random() * personalityData.thoughts.recap.good.length)]
+                : personalityData.thoughts.recap.bad[Math.floor(Math.random() * personalityData.thoughts.recap.bad.length)]
+            }
+          />
+        )}
+
+        <div className="quick-controls" style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '10px', gap: '10px' }}>
+          <button 
+            onClick={() => setIsAlwaysOnTop(!isAlwaysOnTop)} 
+            className="control-btn" 
+            title={isAlwaysOnTop ? "Disable Always on Top" : "Enable Always on Top"}
+            style={{ fontSize: '1.2rem', padding: '5px 10px', background: isAlwaysOnTop ? '#e0f7fa' : 'transparent', border: '1px solid #ccc', borderRadius: '5px', cursor: 'pointer' }}
+          >
+            📌
+          </button>
+          <button 
+            onClick={() => setMiniMode(!miniMode)} 
+            className="control-btn" 
+            title="Toggle Mini Mode"
+            style={{ fontSize: '1.2rem', padding: '5px 10px', background: 'transparent', border: '1px solid #ccc', borderRadius: '5px', cursor: 'pointer' }}
+          >
+            {miniMode ? "🗖" : "🗕"}
+          </button>
+          <button 
+            onClick={() => setSoundEnabled(!soundEnabled)} 
+            className="control-btn" 
+            title="Toggle Sound"
+            style={{ fontSize: '1.2rem', padding: '5px 10px', background: 'transparent', border: '1px solid #ccc', borderRadius: '5px', cursor: 'pointer' }}
+          >
+            {soundEnabled ? "🔊" : "🔇"}
+          </button>
+        </div>
+
+        {!miniMode && (
+          <>
+            <StatsSummary 
+              petName={petName}
+          petLevel={petLevel}
+          totalCalories={totalCalories}
+          petCoins={petCoins}
+          dailyMovements={dailyMovements}
+          dailyStreakGoal={dailyStreakGoal}
+          careStreak={careStreak}
+          dailyCalories={dailyCalories}
+          totalMovements={totalMovements}
+          weeklyData={weeklyData}
+          hunger={hunger}
+          hydration={hydration}
+          moodCategory={moodCategory}
+          energy={energy}
+          energyCategory={energyCategory}
+          personalityData={personalityData}
+          friendshipData={friendshipData}
+          happiness={happiness}
+          activeBuffs={activeBuffs}
+          weather={weather}
+          season={season}
+          feedPet={feedPet}
+          drinkWater={drinkWater}
+          toggleRest={toggleRest}
+          cancelTraining={() => setActiveTraining(null)}
+          isResting={isResting}
+          trainingLevels={trainingLevels}
+          activeTraining={activeTraining}
+          openJournal={() => setShowJournal(true)}
+          openQuests={() => setShowQuestJournal(true)}
+          openSkillTree={() => setShowSkillTree(true)}
+          openBreathing={() => setShowBreathing(true)}
+          openAppUsageReport={() => setShowAppUsageReport(true)}
+          shareProgress={shareProgress}
+          sleepScheduleEnabled={sleepScheduleEnabled}
+          bedtime={bedtime}
+          wakeTime={wakeTime}
+          isPaused={isPaused}
+          togglePause={() => setIsPaused(!isPaused)}
+
+          quietHoursActive={quietHoursEnabled && (
+            (() => {
+              const now = new Date();
+              const isWeekend = now.getDay() === 0 || now.getDay() === 6;
+              const currentTimeStr = `${now.getHours().toString().padStart(2, "0")}:${now.getMinutes().toString().padStart(2, "0")}`;
+              if (isWeekend && quietHoursWeekendEnabled) {
+                return isWithinWindow(currentTimeStr, quietHoursWeekendStart, quietHoursWeekendEnd);
+              } else if (!isWeekend) {
+                return isWithinWindow(currentTimeStr, quietHoursStart, quietHoursEnd);
+              }
+              return false;
+            })()
+          )}
+          focusedApp={productivityModeEnabled && focusApps.some(app => focusedApp.includes(app)) ? focusedApp : undefined}
+          focusDuration={focusDuration}
+          smartFocusInterval={smartFocusInterval}
+        />
+
+        {showAppUsageReport && (
+          <div className="modal-overlay" onClick={() => setShowAppUsageReport(false)}>
+            <div className="modal-content" onClick={e => e.stopPropagation()}>
+              <button className="close-btn" onClick={() => setShowAppUsageReport(false)}>×</button>
+              <AppUsageReport appUsage={appUsage} onClose={() => setShowAppUsageReport(false)} />
+            </div>
+          </div>
+        )}
+        <HistoryList history={history} />
+        
+        <Inventory 
+          inventory={inventory} 
+          onUseItem={handleUseItem} 
+          petCoins={petCoins} 
+        />
+
+        <PetShop 
+          petCoins={petCoins}
+          onBuyItem={handleBuyConsumable}
+        />
+
+        <Customization
+          level={petLevel}
+          petCoins={petCoins}
+          setPetCoins={setPetCoins}
+          unlockedCosmetics={unlockedCosmetics}
+          setUnlockedCosmetics={setUnlockedCosmetics}
+          petColor={petColor}
+          setPetColor={setPetColor}
+          enabledAccessories={enabledAccessories}
+          toggleAccessory={toggleAccessory}
+          onCosmeticBought={handleCosmeticBought}
+          personality={personality}
+          setPersonality={setPersonality}
+          unlockedSpecies={unlockedSpecies}
+          selectedSpecies={selectedSpecies}
+          setSelectedSpecies={setSelectedSpecies}
+          selectedBackground={selectedBackground}
+          setSelectedBackground={setSelectedBackground}
+          unlockedBackgrounds={unlockedBackgrounds}
+          setUnlockedBackgrounds={setUnlockedBackgrounds}
+        />
+        <Settings
+          isPaused={isPaused}
+          setIsPaused={setIsPaused}
+          petName={petName}
+          setPetName={setPetName}
+          inactivityTimeout={inactivityTimeout}
+          setInactivityTimeout={setInactivityTimeout}
+          targetDuration={targetDuration}
+          setTargetDuration={setTargetDuration}
+          motionThreshold={motionThreshold}
+          setMotionThreshold={setMotionThreshold}
+          dailyGoal={dailyGoal}
+          setDailyGoal={setDailyGoal}
+          dailyStreakGoal={dailyStreakGoal}
+          setDailyStreakGoal={setDailyStreakGoal}
+          deviceId={deviceId}
+          setDeviceId={setDeviceId}
+          devices={devices}
+          autoMode={autoMode}
+          setAutoMode={setAutoMode}
+          strictMode={strictMode}
+          setStrictMode={setStrictMode}
+          soundEnabled={soundEnabled}
+          setSoundEnabled={setSoundEnabled}
+          soundVolume={soundVolume}
+          setSoundVolume={setSoundVolume}
+          petOpacity={petOpacity}
+          setPetOpacity={setPetOpacity}
+          theme={theme}
+          setTheme={setTheme}
+          sleepScheduleEnabled={sleepScheduleEnabled}
+          setSleepScheduleEnabled={setSleepScheduleEnabled}
+          bedtime={bedtime}
+          setBedtime={setBedtime}
+          wakeTime={wakeTime}
+          setWakeTime={setWakeTime}
+          quietHoursEnabled={quietHoursEnabled}
+          setQuietHoursEnabled={setQuietHoursEnabled}
+          quietHoursStart={quietHoursStart}
+          setQuietHoursStart={setQuietHoursStart}
+          quietHoursEnd={quietHoursEnd}
+          setQuietHoursEnd={setQuietHoursEnd}
+          quietHoursWeekendEnabled={quietHoursWeekendEnabled}
+          setQuietHoursWeekendEnabled={setQuietHoursWeekendEnabled}
+          quietHoursWeekendStart={quietHoursWeekendStart}
+          setQuietHoursWeekendStart={setQuietHoursWeekendStart}
+          quietHoursWeekendEnd={quietHoursWeekendEnd}
+          setQuietHoursWeekendEnd={setQuietHoursWeekendEnd}
+          productivityModeEnabled={productivityModeEnabled}
+          setProductivityModeEnabled={setProductivityModeEnabled}
+          smartFocusEnabled={smartFocusEnabled}
+          setSmartFocusEnabled={setSmartFocusEnabled}
+          smartFocusInterval={smartFocusInterval}
+          setSmartFocusInterval={setSmartFocusInterval}
+          focusApps={focusApps}
+          setFocusApps={setFocusApps}
+          resetStreak={() => setStreak(0)}
+          resetStats={() => {
+            setTotalMovements(0);
+            setTotalCalories(0);
+            setDailyMovements(0);
+            setDailyCalories(0);
+            setWeeklyData([
+              { day: "Sun", moves: 0, calories: 0, avgMood: 0, moodSamples: 0 },
+              { day: "Mon", moves: 0, calories: 0, avgMood: 0, moodSamples: 0 },
+              { day: "Tue", moves: 0, calories: 0, avgMood: 0, moodSamples: 0 },
+              { day: "Wed", moves: 0, calories: 0, avgMood: 0, moodSamples: 0 },
+              { day: "Thu", moves: 0, calories: 0, avgMood: 0, moodSamples: 0 },
+              { day: "Fri", moves: 0, calories: 0, avgMood: 0, moodSamples: 0 },
+              { day: "Sat", moves: 0, calories: 0, avgMood: 0, moodSamples: 0 },
+            ]);
+            setHistory([]);
+            setMood(50);
+            setEnergy(100);
+          }}
+          
+        />
+          </>
+        )}
+      </div>
+
+      <div className="pet-preview" data-tauri-drag-region style={{ opacity: petOpacity }}>
+        <VoiceIndicator soundLevel={soundLevel} />
+        {autoMode && !isInactive && !isPaused && (
+          <div 
+            className="idle-timer-bar" 
+            style={{ 
+              width: '80%', 
+              height: '4px', 
+              background: 'rgba(255,255,255,0.1)', 
+              borderRadius: '2px', 
+              margin: '0 auto 10px',
+              overflow: 'hidden' 
+            }}
+            title="Time until pet needs movement"
+          >
+            <div 
+              style={{ 
+                height: '100%', 
+                background: '#4caf50', 
+                width: `${Math.min((idleTime / effectiveTimeout) * 100, 100)}%`,
+                transition: 'width 1s linear'
+              }} 
+            />
+          </div>
+        )}
+        <Pet 
+          state={state} 
+          name={petName} 
+          speciesId={selectedSpecies}
+          personality={personality}
+          level={petLevel} 
+          friendshipLevel={friendshipLevel}
+          hunger={hunger}
+          hydration={hydration}
+          energy={energy}
+          energyCategory={energyCategory}
+          color={petColor}
+          moodCategory={moodCategory}
+          weatherCondition={weather?.condition}
+          season={season}
+          enabledAccessories={enabledAccessories}
+          mousePosition={mousePosition}
+          windowPosition={windowPosition}
+          soundLevel={soundLevel}
+          soundEnabled={soundEnabled}
+          thoughtOverride={thoughtOverride}
+          movementProgress={movementDuration / targetDuration}
+          activeFriend={activeFriend}
+          isFocusZen={hasBuff('focus_zen')}
+          adoptionDate={adoptionDate}
+          onPet={handlePet}
+          onPoke={handlePoke}
+          onChat={handleChat}
+          onDreamRecorded={handleDreamRecorded}
+          onThoughtClick={handleThoughtClick}
+        />
+      </div>
+
+      {!miniMode && (
+        <>
+          <div className="controls">
+            <button onClick={() => setState("idle")}>Idle</button>
+            <button onClick={() => setState("thinking")}>Thinking</button>
+            <button onClick={() => setState("chatting")}>Chatting</button>
+            <button onClick={() => setState("disturbed")}>Disturbed</button>
+            <button onClick={() => setState("happy")}>Happy</button>
+            <button onClick={() => setState("floating")}>Floating</button>
+          </div>
+
+          <p className="instruction">
+            {autoMode 
+              ? "In Auto Mode, the pet appears disturbed after a period of inactivity. MOVE in front of your webcam to make it happy!"
+              : "Manual mode: use buttons to test states."}
+            {strictMode && " Strict Mode will lock the screen until you move!"}
+          </p>
+          <p className="privacy-note">
+            Your camera stream is processed entirely in your browser. No frames or data are sent to any server.
+          </p>
+        </>
+      )}
+
+      {showShareGenerator && (
+        <ShareImageGenerator
+          petName={petName}
+          petLevel={petLevel}
+          speciesIcon={PET_SPECIES.find(s => s.id === selectedSpecies)?.icon || "🐉"}
+          petColor={selectedSpecies === "emerald_dragon" ? petColor : (PET_SPECIES.find(s => s.id === selectedSpecies)?.color || "#4caf50")}
+          totalMovements={showDailyRecap ? yesterdayStats.movements : totalMovements}
+          totalCalories={showDailyRecap ? yesterdayStats.calories : totalCalories}
+          streak={showDailyRecap ? yesterdayStats.streak : streak}
+          careStreak={showDailyRecap ? yesterdayStats.careStreak : careStreak}
+          onClose={() => setShowShareGenerator(false)}
+        />
+      )}
+    </main>
+  );
+}
+
+export default App;

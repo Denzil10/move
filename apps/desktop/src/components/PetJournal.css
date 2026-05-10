@@ -1,0 +1,544 @@
+.journal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  backdrop-filter: blur(4px);
+}
+
+.journal-container {
+  background: #1e1e2e;
+  color: #cdd6f4;
+  width: 90%;
+  max-width: 500px;
+  max-height: 85vh;
+  border-radius: 16px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  border: 1px solid #313244;
+}
+
+.journal-tabs {
+  display: flex;
+  background: #11111b;
+  padding: 0 10px;
+  border-bottom: 1px solid #313244;
+}
+
+.tab-btn {
+  flex: 1;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: #a6adc8;
+  padding: 12px 5px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.tab-btn:hover {
+  color: #cdd6f4;
+}
+
+.tab-btn.active {
+  color: #fab387;
+  border-bottom-color: #fab387;
+}
+
+.milestone-gallery {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.milestone-card {
+  background: #313244;
+  border-radius: 12px;
+  overflow: hidden;
+  display: flex;
+  border: 1px solid #45475a;
+  transition: transform 0.2s ease;
+}
+
+.milestone-card:hover {
+  transform: scale(1.02);
+  border-color: #fab387;
+}
+
+.milestone-moment {
+  width: 80px;
+  background: #181825;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 2.5rem;
+  flex-shrink: 0;
+  border-right: 1px solid #45475a;
+}
+
+.milestone-card-info {
+  padding: 12px;
+  flex-grow: 1;
+}
+
+.milestone-card-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+.milestone-card-level {
+  font-weight: bold;
+  color: #cba6f7;
+  font-size: 0.9rem;
+}
+
+.milestone-card-date {
+  font-size: 0.75rem;
+  color: #6c7086;
+}
+
+.milestone-card-desc {
+  margin: 0;
+  font-size: 0.85rem;
+  line-height: 1.4;
+  color: #bac2de;
+}
+
+.journal-header {
+  padding: 16px 20px;
+  background: #11111b;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.journal-header h2 {
+  margin: 0;
+  font-size: 1.2rem;
+  color: #fab387;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  color: #a6adc8;
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 0 5px;
+}
+
+.close-btn:hover {
+  color: #f38ba8;
+}
+
+.journal-content {
+  padding: 20px;
+  overflow-y: auto;
+  flex-grow: 1;
+}
+
+.journal-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 25px;
+}
+
+.stat-card {
+  background: #313244;
+  padding: 10px 5px;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.collection-trigger {
+  cursor: pointer;
+  transition: transform 0.2s, background-color 0.2s;
+  border: 1px solid transparent;
+}
+
+.collection-trigger:hover {
+  transform: translateY(-2px);
+  background-color: rgba(203, 166, 247, 0.1);
+  border-color: #cba6f7;
+}
+
+.stat-label {
+  font-size: 0.8rem;
+  color: #a6adc8;
+  margin-bottom: 4px;
+}
+
+.stat-value {
+  font-size: 1.4rem;
+  font-weight: bold;
+  color: #cba6f7;
+}
+
+.xp-progress-section {
+  grid-column: span 3;
+  margin-top: 10px;
+}
+
+.xp-text {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.9rem;
+  margin-bottom: 6px;
+}
+
+.xp-bar-container {
+  height: 10px;
+  background: #45475a;
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+.xp-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #cba6f7, #89b4fa);
+  border-radius: 5px;
+  transition: width 0.3s ease;
+}
+
+.xp-subtext {
+  font-size: 0.75rem;
+  color: #a6adc8;
+  text-align: right;
+  margin-top: 4px;
+}
+
+.journal-section {
+  margin-bottom: 30px;
+}
+
+.bond-section {
+  background: rgba(243, 139, 168, 0.05);
+  border: 1px solid rgba(243, 139, 168, 0.1);
+  padding: 16px;
+  border-radius: 12px;
+  margin-bottom: 30px;
+}
+
+.bond-status {
+  margin-bottom: 16px;
+}
+
+.bond-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.bond-title {
+  font-weight: bold;
+  font-size: 1.1rem;
+  color: #f38ba8;
+}
+
+.bond-level {
+  font-size: 0.9rem;
+  color: #a6adc8;
+}
+
+.bond-bar-container {
+  height: 10px;
+  background: #45475a;
+  border-radius: 5px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+.bond-bar-fill {
+  height: 100%;
+  transition: width 0.3s ease;
+}
+
+.bond-multiplier {
+  font-size: 0.9rem;
+  color: #a6e3a1;
+  margin: 0;
+  font-weight: 500;
+}
+
+.journal-section h3 {
+  font-size: 1rem;
+  color: #a6e3a1;
+  margin-bottom: 15px;
+  border-bottom: 1px solid #313244;
+  padding-bottom: 8px;
+}
+
+.achievement-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.achievement-badge {
+  background: #313244;
+  padding: 10px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border: 1px solid #45475a;
+}
+
+.badge-icon {
+  font-size: 1.8rem;
+}
+
+.badge-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.badge-title {
+  font-size: 0.85rem;
+  font-weight: bold;
+  color: #cdd6f4;
+}
+
+.badge-date {
+  font-size: 0.7rem;
+  color: #6c7086;
+}
+
+.no-milestones {
+  text-align: center;
+  color: #6c7086;
+  font-style: italic;
+  margin-top: 20px;
+}
+
+.roadmap-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.roadmap-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 12px;
+  background: #313244;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  transition: all 0.2s ease;
+}
+
+.roadmap-item.locked {
+  opacity: 0.6;
+  filter: grayscale(0.5);
+  border: 1px dashed #45475a;
+}
+
+.roadmap-item.unlocked {
+  background: #45475a;
+  border: 1px solid #585b70;
+}
+
+.roadmap-level {
+  font-weight: bold;
+  color: #fab387;
+  min-width: 50px;
+}
+
+.roadmap-reward {
+  flex-grow: 1;
+  color: #bac2de;
+}
+
+.roadmap-check {
+  color: #a6e3a1;
+  font-weight: bold;
+}
+
+/* Wellness Tab Styles */
+.wellness-header-card {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  background: #313244;
+  padding: 20px;
+  border-radius: 16px;
+  margin-bottom: 25px;
+  border: 1px solid #45475a;
+}
+
+.care-score-circle {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  border: 4px solid #f38ba8;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background: #1e1e2e;
+  flex-shrink: 0;
+}
+
+.score-value {
+  font-size: 1.8rem;
+  font-weight: bold;
+  color: #f38ba8;
+}
+
+.score-label {
+  font-size: 0.7rem;
+  color: #a6adc8;
+}
+
+.care-score-feedback h4 {
+  margin: 0 0 8px 0;
+  color: #fab387;
+  font-size: 1rem;
+}
+
+.care-score-feedback p {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #bac2de;
+  line-height: 1.4;
+}
+
+.wellness-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin-bottom: 30px;
+}
+
+.wellness-item {
+  display: grid;
+  grid-template-columns: 100px 1fr 50px;
+  align-items: center;
+  gap: 15px;
+}
+
+.wellness-label {
+  font-size: 0.85rem;
+  color: #a6adc8;
+}
+
+.wellness-bar {
+  height: 8px;
+  background: #11111b;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.wellness-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.5s ease;
+}
+
+.wellness-value {
+  font-size: 0.9rem;
+  font-weight: bold;
+  color: #cdd6f4;
+  text-align: right;
+}
+
+.mood-trends h4, .health-tips h4 {
+  font-size: 1rem;
+  color: #a6e3a1;
+  margin: 0 0 15px 0;
+  border-bottom: 1px solid #313244;
+  padding-bottom: 8px;
+}
+
+.mood-list {
+  display: flex;
+  justify-content: space-between;
+  background: #11111b;
+  padding: 15px;
+  border-radius: 12px;
+  margin-bottom: 25px;
+}
+
+.mood-day {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.day-name {
+  font-size: 0.7rem;
+  color: #6c7086;
+  text-transform: uppercase;
+  font-weight: bold;
+}
+
+.mood-indicator {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.mood-emoji {
+  font-size: 0.8rem;
+}
+
+.mood-sparkline {
+  width: 4px;
+  height: 30px;
+  background: #313244;
+  border-radius: 2px;
+  display: flex;
+  align-items: flex-end;
+}
+
+.mood-sparkline-fill {
+  width: 100%;
+  background: #fab387;
+  border-radius: 2px;
+  transition: height 0.5s ease;
+}
+
+.no-data {
+  font-size: 0.6rem;
+  color: #45475a;
+}
+
+.tip-card {
+  background: rgba(166, 227, 161, 0.1);
+  border: 1px solid rgba(166, 227, 161, 0.2);
+  padding: 15px;
+  border-radius: 12px;
+  display: flex;
+  gap: 15px;
+  align-items: flex-start;
+}
+
+.tip-icon {
+  font-size: 1.5rem;
+}
+
+.tip-card p {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #cdd6f4;
+  line-height: 1.5;
+}

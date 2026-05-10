@@ -1,0 +1,180 @@
+.collection-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.collection-modal {
+  background: var(--bg-color, #ffffff);
+  color: var(--text-color, #333);
+  width: 90%;
+  max-width: 600px;
+  max-height: 80vh;
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.collection-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.collection-header h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  color: var(--primary-color, #4caf50);
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  font-size: 2rem;
+  cursor: pointer;
+  color: #888;
+}
+
+.collection-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.stat-card {
+  background: rgba(0, 0, 0, 0.05);
+  padding: 10px;
+  border-radius: 8px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+}
+
+.stat-label {
+  font-size: 0.8rem;
+  color: #666;
+}
+
+.stat-value {
+  font-size: 1.2rem;
+  font-weight: bold;
+}
+
+.species-grid {
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-right: 5px;
+}
+
+.species-card {
+  display: flex;
+  gap: 15px;
+  padding: 12px;
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.03);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  transition: transform 0.2s;
+}
+
+.species-card.unlocked:hover {
+  transform: translateY(-2px);
+}
+
+.species-icon {
+  font-size: 2.5rem;
+  width: 60px;
+  height: 60px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: 12px;
+}
+
+.species-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.species-name-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
+.species-name {
+  font-weight: bold;
+  font-size: 1.1rem;
+}
+
+.species-rarity {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-weight: bold;
+}
+
+.rarity-common .species-rarity { background: #e0e0e0; color: #616161; }
+.rarity-uncommon .species-rarity { background: #c8e6c9; color: #2e7d32; }
+.rarity-rare .species-rarity { background: #bbdefb; color: #1565c0; }
+.rarity-epic .species-rarity { background: #e1bee7; color: #6a1b9a; }
+.rarity-legendary .species-rarity { background: #fff9c4; color: #f9a825; }
+
+.species-description {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #666;
+  line-height: 1.3;
+}
+
+.unlocked-date {
+  font-size: 0.7rem;
+  color: #999;
+  margin-top: 4px;
+}
+
+.locked {
+  filter: grayscale(1);
+  opacity: 0.7;
+}
+
+.locked .species-icon {
+  background: #eee;
+  color: #999;
+}
+
+.locked .species-name {
+  color: #999;
+}
+
+/* Dark mode adjustments */
+:global(.dark) .collection-modal {
+  background: #1a1a1a;
+  color: #f0f0f0;
+}
+
+:global(.dark) .stat-card {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+:global(.dark) .species-card {
+  background: rgba(255, 255, 255, 0.03);
+  border-color: rgba(255, 255, 255, 0.05);
+}

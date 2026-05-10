@@ -1,12 +1,12 @@
-# Move Dragon Business Autopilot
+# Move Pet Business Autopilot
 
 ## Product
 
-Move Dragon is a lightweight desktop companion for people who sit too long during gaming, coding, work, or scrolling. After a long inactive session, a small dragon appears disturbed. When the user moves, it gets happy, floats with them, disappears after 3 seconds, and shows a victory toast with estimated calories burned.
+Move Pet is a lightweight desktop companion for people who sit too long during gaming, coding, work, or scrolling. At regular intervals, a small pet appears with a fun movement prompt. When the user moves, it gets happy, floats with them, disappears after 3 seconds, and shows a victory toast with estimated calories burned.
 
 ## Wedge
 
-Existing break apps optimize reminders. Desktop pet apps optimize charm. Move Dragon should win by combining:
+Existing break apps optimize reminders. Desktop pet apps optimize charm. Move Pet should win by combining:
 
 - Cute, visible emotional feedback instead of generic alerts.
 - Local movement verification instead of "click to dismiss".
@@ -16,21 +16,30 @@ Existing break apps optimize reminders. Desktop pet apps optimize charm. Move Dr
 ## MVP
 
 - Cross-platform desktop shell: Tauri first, Electron only if needed for speed.
-- Overlay dragon widget: idle, disturbed, happy, floating, victory states.
+- Overlay pet widget: idle, disturbed, happy, floating, victory states.
 - Inactivity trigger: default 3 hours, configurable.
+- Fun movement prompts: short rotating prompts that tell the user exactly what to do next.
 - Local motion detector: start with webcam frame-diff and MediaPipe Pose fallback.
 - Strict mode: lock keyboard/mouse until movement target is met; require explicit opt-in and emergency exits.
 - Victory toast: minutes moved, estimated calories, streak.
 - Settings: inactivity window, strict mode, camera device, privacy indicator.
+- Pet scope: built-in curated pet library only for this phase; no user-generated pets or pet import flow.
 
 ## Autopilot System
 
-The business loop runs every 5 minutes:
+The business loop runs every 5 minutes from the shared agent service:
 
 1. Research current market, competitors, technical shortcuts, and free-tier tools.
 2. Execute the highest-value next action in product, marketing, docs, or growth.
 3. Review outputs against profitability, shipping speed, and privacy constraints.
 4. Improve the backlog, prompts, product assets, and implementation.
+
+Agent routing:
+
+- Service repo: `/Users/denzil/Projects/personal/self/agent`.
+- Project config: `projects/move/agents/autopilot/`.
+- Harness: Gemini CLI.
+- Schedule: `*/5 * * * *`.
 
 Ask the user only for important business decisions:
 
@@ -43,14 +52,15 @@ Ask the user only for important business decisions:
 ## Free-Tier Policy
 
 - Prefer local models, browser-controlled free tools, and existing free API keys.
-- Use NVIDIA NIM through the local Claude proxy for agent work when reliable enough.
+- Use Gemini CLI through the shared agent service for routine autopilot work.
 - Use the user browser profile only when an account flow or free web tool is necessary.
 - Do not introduce paid SaaS dependencies unless the user approves.
+- Bundle the richest and most popular open Hatch/Codex-compatible pet library available. Licensing is handled separately from the build.
 
 ## Initial Go-To-Market
 
 - Target niche: gamers and deep-work builders who ignore normal reminders.
-- Positioning: "a tiny dragon that gets upset when you forget to move."
+- Positioning: "a tiny pet that gets upset when you forget to move."
 - Launch surfaces: Reddit productivity/gaming/dev communities, X/Twitter clips, TikTok/Reels demo, itch.io, Product Hunt later.
 - Proof loop: post short clips, collect waitlist, ship macOS alpha, then Windows.
 

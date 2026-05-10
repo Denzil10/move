@@ -1,0 +1,162 @@
+.daily-recap-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+  backdrop-filter: blur(4px);
+}
+
+.daily-recap-modal {
+  background: var(--bg-card, #2a2a2a);
+  color: var(--text-main, #ffffff);
+  width: 90%;
+  max-width: 450px;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.daily-recap-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.daily-recap-header h2 {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.personality-tag {
+  font-size: 0.75rem;
+  background: var(--primary-color, #4caf50);
+  color: white;
+  padding: 4px 8px;
+  border-radius: 8px;
+  text-transform: uppercase;
+  font-weight: bold;
+}
+
+.daily-recap-pet-section {
+  background: rgba(255, 255, 255, 0.05);
+  padding: 16px;
+  border-radius: 12px;
+}
+
+.pet-message {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.pet-avatar {
+  font-size: 2rem;
+}
+
+.pet-message p {
+  margin: 0;
+  font-style: italic;
+  line-height: 1.4;
+  flex: 1;
+}
+
+.daily-recap-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.recap-stat-card {
+  background: rgba(255, 255, 255, 0.03);
+  padding: 12px;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.recap-stat-card.highlighted {
+  grid-column: span 2;
+  background: rgba(255, 215, 0, 0.05);
+  border-color: rgba(255, 215, 0, 0.2);
+}
+
+.stat-label {
+  font-size: 0.8rem;
+  color: var(--text-dim, #aaaaaa);
+  margin-bottom: 4px;
+}
+
+.stat-value {
+  font-size: 1.1rem;
+  font-weight: bold;
+}
+
+.daily-recap-footer {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+}
+
+.recap-share-button {
+  background: #3498db;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 10px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: transform 0.1s;
+}
+
+.recap-share-button:hover {
+  transform: scale(1.05);
+  background: #2980b9;
+}
+
+.recap-share-button:active {
+  transform: scale(0.95);
+}
+
+.recap-close-button {
+  background: var(--primary-color, #4caf50);
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 10px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: transform 0.1s;
+}
+
+.recap-close-button:hover {
+  transform: scale(1.05);
+  background: var(--primary-hover, #45a049);
+}
+
+.recap-close-button:active {
+  transform: scale(0.95);
+}
+
+.recap-stat-card.care-streak-card {
+  grid-column: span 2;
+  background: rgba(255, 64, 129, 0.05);
+  border-color: rgba(255, 64, 129, 0.2);
+}

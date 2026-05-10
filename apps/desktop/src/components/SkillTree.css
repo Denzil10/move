@@ -1,0 +1,174 @@
+.skill-tree-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.85);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+  backdrop-filter: blur(5px);
+}
+
+.skill-tree-content {
+  background: #2c3e50;
+  width: 90%;
+  max-width: 800px;
+  max-height: 85vh;
+  border-radius: 15px;
+  padding: 2rem;
+  overflow-y: auto;
+  color: white;
+  border: 2px solid #34495e;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+.skill-tree-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  border-bottom: 2px solid #34495e;
+  padding-bottom: 1rem;
+}
+
+.skill-tree-header h2 {
+  margin: 0;
+  font-size: 1.8rem;
+  color: #3498db;
+}
+
+.skill-tree-stats {
+  display: flex;
+  gap: 1.5rem;
+  font-weight: bold;
+  font-size: 1.1rem;
+}
+
+.close-button {
+  background: none;
+  border: none;
+  color: #bdc3c7;
+  font-size: 2rem;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+}
+
+.close-button:hover {
+  color: white;
+}
+
+.skills-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 1.5rem;
+}
+
+.skill-card {
+  background: #34495e;
+  border-radius: 12px;
+  padding: 1.2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  transition: all 0.2s ease;
+  border: 2px solid transparent;
+  position: relative;
+}
+
+.skill-card.unlocked {
+  background: #2980b9;
+  border-color: #3498db;
+  box-shadow: 0 0 15px rgba(52, 152, 219, 0.3);
+}
+
+.skill-card.available {
+  border-color: #27ae60;
+  cursor: pointer;
+}
+
+.skill-card.available:hover {
+  transform: translateY(-5px);
+  background: #3d566e;
+}
+
+.skill-card.locked {
+  opacity: 0.7;
+}
+
+.skill-icon {
+  font-size: 2.5rem;
+  text-align: center;
+}
+
+.skill-info h3 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.2rem;
+}
+
+.skill-info p {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #bdc3c7;
+  line-height: 1.4;
+}
+
+.skill-requirements {
+  margin-top: 1rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  font-size: 0.8rem;
+}
+
+.req-failed {
+  color: #e74c3c;
+  background: rgba(231, 76, 60, 0.1);
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.req-passed {
+  color: #2ecc71;
+  background: rgba(46, 204, 113, 0.1);
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.prereqs {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  margin-top: 0.3rem;
+}
+
+.unlock-button {
+  margin-top: 1rem;
+  width: 100%;
+  background: #27ae60;
+  color: white;
+  border: none;
+  padding: 0.6rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background 0.2s;
+}
+
+.unlock-button:hover {
+  background: #2ecc71;
+}
+
+.unlocked-tag {
+  margin-top: 1rem;
+  text-align: center;
+  font-weight: bold;
+  color: #2ecc71;
+  background: rgba(46, 204, 113, 0.2);
+  padding: 0.4rem;
+  border-radius: 6px;
+}

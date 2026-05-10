@@ -271,7 +271,10 @@ async def test_force_non_streaming_wraps_completion_as_sse(provider_config):
 
         events = [e async for e in provider.stream_response(req)]
 
-    _, kwargs = mock_create.await_args
+    if mock_create.await_args:
+        _, kwargs = mock_create.await_args
+    else:
+        kwargs = {}  # Fallback for test setup without await_args
     assert kwargs["stream"] is False
     event_text = "".join(events)
     assert "proxy ok" in event_text

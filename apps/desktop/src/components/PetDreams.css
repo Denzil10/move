@@ -1,0 +1,110 @@
+.pet-dreams-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 0.5rem;
+}
+
+.pet-dreams-container h3 {
+  margin: 0;
+  color: #6200ea;
+  font-size: 1.2rem;
+}
+
+.pet-dreams-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 1rem;
+  text-align: center;
+  color: #666;
+  background: rgba(0, 0, 0, 0.03);
+  border-radius: 12px;
+  border: 2px dashed #ccc;
+}
+
+.dream-icon {
+  font-size: 3rem;
+  margin-top: 1rem;
+  opacity: 0.5;
+}
+
+.dreams-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  max-height: 400px;
+  overflow-y: auto;
+  padding-right: 0.5rem;
+}
+
+.dream-entry {
+  background: white;
+  border-radius: 12px;
+  padding: 1rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  border-left: 4px solid #9c27b0;
+  transition: transform 0.2s;
+}
+
+.dream-entry:hover {
+  transform: translateX(4px);
+}
+
+.dream-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+  font-size: 0.8rem;
+}
+
+.dream-date {
+  color: #888;
+}
+
+.dream-personality {
+  background: #f3e5f5;
+  color: #7b1fa2;
+  padding: 0.2rem 0.5rem;
+  border-radius: 10px;
+  text-transform: capitalize;
+}
+
+.dream-content {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+}
+
+.dream-cloud-icon {
+  font-size: 1.2rem;
+  flex-shrink: 0;
+}
+
+.dream-text {
+  margin: 0;
+  color: #333;
+  line-height: 1.4;
+  font-style: italic;
+}
+
+/* Custom Scrollbar for dreams list */
+.dreams-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.dreams-list::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+
+.dreams-list::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 10px;
+}
+
+.dreams-list::-webkit-scrollbar-thumb:hover {
+  background: #999;
+}

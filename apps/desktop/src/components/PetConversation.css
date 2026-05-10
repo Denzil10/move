@@ -1,0 +1,134 @@
+.pet-conversation-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+  pointer-events: auto;
+  backdrop-filter: blur(2px);
+}
+
+.pet-conversation-window {
+  width: 90%;
+  max-width: 350px;
+  background: var(--bg-color);
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid var(--panel-border);
+  max-height: 80%;
+}
+
+.conversation-header {
+  padding: 10px 15px;
+  background: var(--panel-bg);
+  border-bottom: 1px solid var(--panel-border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.conversation-header h3 {
+  margin: 0;
+  font-size: 0.95rem;
+  color: var(--text-color);
+}
+
+.conversation-messages {
+  flex: 1;
+  padding: 15px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: var(--bg-color);
+  min-height: 200px;
+}
+
+.message {
+  display: flex;
+  width: 100%;
+}
+
+.message.pet {
+  justify-content: flex-start;
+}
+
+.message.user {
+  justify-content: flex-end;
+}
+
+.message-bubble {
+  padding: 8px 12px;
+  border-radius: 15px;
+  max-width: 85%;
+  font-size: 0.85rem;
+  line-height: 1.4;
+  word-wrap: break-word;
+}
+
+.pet .message-bubble {
+  background: var(--panel-bg);
+  color: var(--text-color);
+  border-bottom-left-radius: 2px;
+}
+
+.user .message-bubble {
+  background: #3498db;
+  color: white;
+  border-bottom-right-radius: 2px;
+}
+
+.message-bubble.typing {
+  font-style: italic;
+  opacity: 0.7;
+  letter-spacing: 2px;
+}
+
+.conversation-options {
+  padding: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  border-top: 1px solid var(--panel-border);
+  background: var(--panel-bg);
+  justify-content: center;
+}
+
+.option-btn {
+  padding: 5px 10px;
+  border-radius: 12px;
+  border: 1px solid var(--panel-border);
+  background: var(--btn-bg);
+  color: var(--btn-text);
+  cursor: pointer;
+  font-size: 0.75rem;
+  transition: all 0.2s;
+}
+
+.option-btn:hover {
+  background: #3498db;
+  color: white;
+  border-color: #3498db;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  color: var(--secondary-text);
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+}
+
+.close-btn:hover {
+  color: var(--text-color);
+}

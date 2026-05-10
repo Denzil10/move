@@ -79,3 +79,17 @@ Product rule:
 - Google MediaPipe Pose Landmarker for web: https://ai.google.dev/edge/mediapipe/solutions/vision/pose_landmarker/web_js
 - Wipey macOS input-locking reference: https://wipey.app/
 - Microsoft PowerToys Always On Top reference: https://microsoft-powertoys-3.mintlify.app/utilities/always-on-top
+
+## Inactivity Detection
+
+MVP path:
+
+1. Web-based idle tracking using event listeners (`mousemove`, `keydown`, `click`, `scroll`).
+2. OS-level idle time retrieval via Tauri native APIs if global detection (outside the app window) is required.
+3. Configurable inactivity thresholds (default 3 hours, testable at 5-10s).
+
+Why web-based first:
+
+- Easiest to prototype in React.
+- Covers basic usage while the app or overlay has focus.
+- Can be extended to global tracking via Tauri's native plugins later.

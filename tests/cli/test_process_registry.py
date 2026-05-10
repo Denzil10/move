@@ -37,7 +37,7 @@ def test_process_registry_kill_all_exception_logged_no_raise(monkeypatch):
     monkeypatch.setattr(pr, "_pids", {99999})
     monkeypatch.setattr(os, "name", "posix", raising=False)
 
-    def _kill_raises(pid, sig):
+    def _kill_raises(pid, _sig):
         raise ProcessLookupError("no such process")
 
     with patch("os.kill", _kill_raises):

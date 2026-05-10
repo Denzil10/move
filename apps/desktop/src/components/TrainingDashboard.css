@@ -1,0 +1,147 @@
+.training-dashboard {
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 12px;
+  padding: 16px;
+  margin-top: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.training-header h4 {
+  margin: 0 0 16px 0;
+  font-size: 1.1rem;
+  color: #f1c40f;
+  text-align: center;
+}
+
+.active-training-box {
+  background: linear-gradient(135deg, rgba(241, 196, 15, 0.2), rgba(230, 126, 34, 0.2));
+  border-radius: 10px;
+  padding: 16px;
+  border: 1px solid rgba(241, 196, 15, 0.3);
+  text-align: center;
+}
+
+.active-training-info {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  text-align: left;
+  margin-bottom: 16px;
+}
+
+.training-icon-large {
+  font-size: 2.5rem;
+}
+
+.training-text strong {
+  display: block;
+  font-size: 1.1rem;
+  color: #f1c40f;
+  margin-bottom: 4px;
+}
+
+.training-text p {
+  margin: 0 0 8px 0;
+  font-size: 0.9rem;
+  opacity: 0.9;
+}
+
+.training-boost-preview {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.85rem;
+  background: rgba(0, 0, 0, 0.3);
+  padding: 4px 12px;
+  border-radius: 20px;
+  width: fit-content;
+}
+
+.training-boost-preview .arrow {
+  color: #f1c40f;
+}
+
+.training-requirement-notice {
+  background: rgba(0, 0, 0, 0.2);
+  padding: 10px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+}
+
+.training-requirement-notice p {
+  margin: 0 0 4px 0;
+  font-size: 0.9rem;
+}
+
+.training-requirement-notice .small {
+  font-size: 0.75rem;
+  opacity: 0.7;
+}
+
+.cancel-training-btn {
+  background: rgba(231, 76, 60, 0.2);
+  border: 1px solid rgba(231, 76, 60, 0.4);
+  color: #e74c3c;
+  padding: 6px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: all 0.2s;
+}
+
+.cancel-training-btn:hover {
+  background: rgba(231, 76, 60, 0.3);
+}
+
+.training-stats-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.training-stat-item {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.stat-icon {
+  font-size: 1.4rem;
+  margin-bottom: 4px;
+}
+
+.stat-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.stat-label {
+  font-size: 0.8rem;
+  opacity: 0.7;
+  font-weight: 500;
+}
+
+.stat-level {
+  font-size: 0.85rem;
+  font-weight: bold;
+  color: #f1c40f;
+}
+
+.stat-boost {
+  font-size: 0.8rem;
+  color: #2ecc71;
+  font-weight: 600;
+}
+
+.training-hint {
+  text-align: center;
+  font-size: 0.8rem;
+  opacity: 0.6;
+  margin-top: 16px;
+  font-style: italic;
+}

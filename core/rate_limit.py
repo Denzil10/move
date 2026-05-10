@@ -56,5 +56,5 @@ class StrictSlidingWindowLimiter:
         await self.acquire()
         return self
 
-    async def __aexit__(self, exc_type, exc, tb) -> bool:
+    async def __aexit__(self, exc_type, exc, _tb) -> bool:
         return False

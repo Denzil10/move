@@ -8,11 +8,11 @@ Workflow: explore current state, implement the smallest useful improvement, veri
 
 ## Product
 
-Build and run Move Dragon on autopilot: a lightweight desktop companion that motivates people to move during gaming, work, coding, and social media.
+Build and run Move Pet on autopilot: a lightweight desktop companion that motivates people to move during gaming, work, coding, and social media.
 
 Core behavior:
 
-- Dragon appears after long inactivity and looks disturbed.
+- Pet appears after long inactivity and looks disturbed.
 - It gets happy when the user moves, floats with them, then disappears after 3 seconds.
 - Strict mode can lock keyboard/mouse until a movement target is met.
 - Motion detection stays local and lightweight.
@@ -33,40 +33,28 @@ Primary files:
 - `docs/technical-research.md` - desktop, overlay, motion, strict-mode research.
 - `tasks/autopilot.md` - lightweight backlog.
 - `autopilot/prompts/system.md` - loop prompt.
-- `scripts/autopilot_loop.py` - 5-minute planner/executor/review loop.
-- `docker-compose.autopilot.yml` - proxy plus loop runner.
+- Agent service project: `/Users/denzil/Projects/personal/self/agent/projects/move`.
+- Agent service UI/API: `http://localhost:3001`.
 - `memory/ontology/graph.jsonl` - project memory graph.
 
 Loop rules:
 
 - Run every 5 minutes when active.
+- Runner is the shared agent service, using Gemini CLI for the Move autopilot.
 - Research before inventing; prefer proven open-source approaches.
 - Improve product, marketing, docs, and backlog.
 - Ask before pricing, public posting/launching, paid services, risky distribution choices, or new credentials.
 - Do not ask for routine implementation, research, docs, or local verification.
 
-## AI Provider
+## Autopilot Runtime
 
-This repo uses the imported `free-claude-code` proxy.
-
-Known local path:
-
-- Provider: NVIDIA NIM.
-- Model: `nvidia_nim/deepseek-ai/deepseek-v4-flash`.
-- Local Claude Code settings: ignored `.claude/settings.local.json`.
-- Proxy: `http://127.0.0.1:8082`.
-- Client env: `ANTHROPIC_BASE_URL=http://127.0.0.1:8082`.
-
-Reliability:
-
-- NVIDIA can be slow; long read timeouts are expected.
-- Use `NVIDIA_NIM_FORCE_NON_STREAMING=true`.
-- Top free models may time out or stream no chunks.
-- Autopilot callers must handle Anthropic JSON and SSE `text_delta`.
+- Move autopilot runs only through the shared agent service.
+- Harnesses: Gemini CLI primary, Jules as async cloud-task harness.
+- Do not recreate repo-local Gemini CLI or proxy autopilot loops.
 
 Secrets:
 
-- Never print `.env`, global Claude settings, provider keys, Bedrock tokens, or compose-rendered env output.
+- Never print `.env`, global CLI settings, provider keys, tokens, or compose-rendered env output.
 - Avoid `docker compose config` when compose loads real `.env`; it expands secrets.
 - Use redacted diagnostics.
 
@@ -94,10 +82,8 @@ Checks:
 
 Read `tasks/lessons.md` before substantial work. Current essentials:
 
-- Missing NVIDIA keys block proxy startup.
-- NVIDIA streaming can emit no chunks; force non-streaming and synthesize SSE.
-- Omit `parallel_tool_calls` on NVIDIA no-tool requests.
-- Disable optional thinking fields for GLM unless live probes prove OK.
+- Gemini CLI in service should prefer cached OAuth credentials; API key is fallback.
+- Scheduler overlap while an agent lock is held should log `SKIP`, not `FAIL`.
 - Docker compose config can print secrets from real `.env`.
 - Docker images must exclude `.env`, `.claude/`, `local/`, and workspace state.
 - This repo is PERSONAL mode despite its path.

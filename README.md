@@ -16,16 +16,9 @@ Free Claude Code routes Anthropic Messages API traffic from Claude Code to NVIDI
 
 Local note: this workspace is configured for NVIDIA NIM with `deepseek-ai/deepseek-v4-flash` in the ignored `.env`. See `docs/local-setup.md` for the provider/model research and NVIDIA compatibility flags.
 
-Autopilot note: this repo also contains the Move Dragon business autopilot scaffold. See `docs/business-autopilot.md`, `tasks/autopilot.md`, and `docker-compose.autopilot.yml`.
-
-Run the local autopilot loop:
-
-```bash
-chmod +x scripts/start_autopilot.sh
-./scripts/start_autopilot.sh
-```
-
-The loop writes state under `local/autopilot/` and logs under `local/logs/`.
+Autopilot note: Move Pet now runs through the shared agent service at
+`/Users/denzil/Projects/personal/self/agent`, project `move`, agent
+`autopilot`. See `docs/business-autopilot.md` and `tasks/autopilot.md`.
 
 [Quick Start](#quick-start) · [Providers](#choose-a-provider) · [Clients](#connect-claude-code) · [Troubleshooting](#troubleshooting) · [Development](#development)
 
@@ -506,6 +499,18 @@ Important pieces:
 - OpenRouter, DeepSeek, LM Studio, llama.cpp, and Ollama use Anthropic Messages style transports.
 - The proxy normalizes thinking blocks, tool calls, token usage metadata, and provider errors into the shape Claude Code expects.
 - Request optimizations answer trivial Claude Code probes locally to save latency and quota.
+
+## Move Pet Documentation
+
+Move Pet is a lightweight desktop companion built within this workspace.
+
+- [Getting Started](docs/getting-started.md) — How to use and configure Move Pet.
+- [Business Autopilot](docs/business-autopilot.md) — Product and business strategy.
+- [Technical Research](docs/technical-research.md) — Desktop overlay and motion detection.
+- [Distribution Plan](docs/distribution-plan.md) — Roadmap for macOS, Windows, and Linux.
+- [Marketing Brief](docs/marketing-brief.md) — Target audience and positioning.
+- [Marketing Copy](docs/marketing-copy.md) — Ad copy and messaging.
+- [Launch Assets](docs/launch-assets.md) — Visual and textual assets for launch.
 
 ## Development
 

@@ -1,0 +1,97 @@
+.friendship-level-up-toast {
+  position: fixed;
+  top: 100px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #2c3e50;
+  color: white;
+  padding: 16px 24px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+  z-index: 2000;
+  border: 2px solid #e74c3c;
+  min-width: 320px;
+  transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.friendship-level-up-toast.visible {
+  top: 100px;
+  opacity: 1;
+}
+
+.friendship-level-up-toast.hidden {
+  top: 50px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.friendship-level-up-toast .toast-icon {
+  font-size: 2.5rem;
+  animation: pulse-heart 2s infinite;
+}
+
+.friendship-level-up-toast h3 {
+  margin: 0;
+  font-size: 1.2rem;
+  color: #ff7675;
+}
+
+.friendship-level-up-toast p {
+  margin: 4px 0 8px 0;
+  font-size: 1rem;
+}
+
+.friendship-bonus {
+  background: rgba(231, 76, 60, 0.15);
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  display: flex;
+  gap: 6px;
+  border: 1px solid rgba(231, 76, 60, 0.3);
+}
+
+.bonus-label {
+  font-weight: bold;
+  color: #ff7675;
+}
+
+.bonus-text {
+  color: #fff;
+}
+
+.friendship-level-up-toast .close-btn {
+  background: none;
+  border: none;
+  color: #888;
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+  position: absolute;
+  top: 10px;
+  right: 10px;
+}
+
+@keyframes pulse-heart {
+  0% { transform: scale(1); }
+  15% { transform: scale(1.15); }
+  30% { transform: scale(1); }
+  45% { transform: scale(1.15); }
+  60% { transform: scale(1); }
+  100% { transform: scale(1); }
+}
+
+/* Light Mode */
+.light-mode .friendship-level-up-toast {
+  background: white;
+  color: #333;
+  border-color: #ff7675;
+}
+
+.light-mode .bonus-text {
+  color: #333;
+}

@@ -34,6 +34,7 @@ class MockRequest:
             setattr(self, k, v)
 
     def model_dump(self, exclude_none=True):
+        _ = exclude_none
         return {
             "model": self.model,
             "messages": [{"role": m.role, "content": m.content} for m in self.messages],

@@ -1,0 +1,57 @@
+.victory-toast {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: #22c55e;
+  color: white;
+  padding: 16px;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  z-index: 1000;
+  transition: transform 0.3s ease, opacity 0.3s ease;
+  min-width: 250px;
+}
+
+.victory-toast.visible {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+.victory-toast.hidden {
+  transform: translateY(100px);
+  opacity: 0;
+}
+
+.toast-icon {
+  font-size: 24px;
+}
+
+.toast-content h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.toast-content p {
+  margin: 4px 0 0 0;
+  font-size: 14px;
+  opacity: 0.9;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 0;
+  margin-left: auto;
+  opacity: 0.7;
+}
+
+.close-btn:hover {
+  opacity: 1;
+}

@@ -1,0 +1,84 @@
+.health-insights {
+  margin-top: 15px;
+  padding: 12px;
+  background-color: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  text-align: left;
+}
+
+.health-insights h3 {
+  margin: 0 0 10px 0;
+  font-size: 0.9rem;
+  color: #a0a0a0;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.insight-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+.insight-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.insight-label {
+  font-size: 0.75rem;
+  color: #888;
+  margin-bottom: 2px;
+}
+
+.insight-value {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #2ecc71;
+}
+
+.insight-value small {
+  font-size: 0.7rem;
+  color: #666;
+  font-weight: normal;
+}
+
+.insight-feedback {
+  font-size: 0.7rem;
+  color: #aaa;
+  font-style: italic;
+  margin-top: 2px;
+}
+
+.insight-tip {
+  font-size: 0.85rem;
+  color: #eee;
+  margin: 4px 0 0 0;
+  line-height: 1.4;
+}
+
+.tip-item {
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding-top: 8px;
+}
+
+/* Light mode adjustments */
+:global(.light) .health-insights {
+  background-color: rgba(0, 0, 0, 0.03);
+}
+
+:global(.light) .health-insights h3 {
+  color: #666;
+}
+
+:global(.light) .insight-label {
+  color: #888;
+}
+
+:global(.light) .insight-value {
+  color: #27ae60;
+}
+
+:global(.light) .insight-tip {
+  color: #333;
+}
