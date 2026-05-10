@@ -1,0 +1,322 @@
+/* SetupScreen — appears as a styled card inside the transparent Tauri window */
+
+.setup-root {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  -webkit-app-region: drag; /* draggable chrome-less window */
+}
+
+.setup-card {
+  width: 380px;
+  background: #18181b;
+  border: 1px solid #2d2d35;
+  border-radius: 16px;
+  padding: 28px 28px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.55);
+  -webkit-app-region: no-drag;
+}
+
+/* Header */
+.setup-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.setup-logo {
+  font-size: 32px;
+}
+
+.setup-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #f4f4f5;
+  margin: 0;
+}
+
+.setup-sub {
+  font-size: 12px;
+  color: #71717a;
+  margin: 2px 0 0;
+}
+
+/* Section */
+.setup-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.setup-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #52525b;
+  margin: 0;
+}
+
+/* Pet selector */
+.pet-selector {
+  display: flex;
+  gap: 10px;
+}
+
+.pet-option {
+  flex: 1;
+  background: #27272a;
+  border: 2px solid #3f3f46;
+  border-radius: 12px;
+  padding: 12px 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+  color: inherit;
+}
+
+.pet-option:hover {
+  background: #2d2d33;
+  border-color: #52525b;
+}
+
+.pet-option.selected {
+  border-color: #6ee7b7;
+  background: #14332a;
+}
+
+.pet-emoji {
+  font-size: 36px;
+  line-height: 1;
+}
+
+.pet-name {
+  font-size: 11px;
+  color: #a1a1aa;
+  font-weight: 500;
+}
+
+/* Tasks */
+.task-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.task-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  background: #27272a;
+  border-radius: 8px;
+  transition: opacity 0.15s;
+}
+
+.task-item.disabled {
+  opacity: 0.45;
+}
+
+.task-toggle {
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  border: 2px solid #3f3f46;
+  background: transparent;
+  cursor: pointer;
+  flex-shrink: 0;
+  padding: 0;
+  position: relative;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.task-toggle.on {
+  background: #6ee7b7;
+  border-color: #6ee7b7;
+}
+
+.task-toggle.on::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M2 6l3 3 5-5' stroke='%2318181b' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E") center/10px no-repeat;
+}
+
+.task-emoji {
+  font-size: 15px;
+}
+
+.task-title {
+  font-size: 13px;
+  color: #d4d4d8;
+  flex: 1;
+}
+
+.task-remove {
+  background: none;
+  border: none;
+  color: #52525b;
+  cursor: pointer;
+  font-size: 16px;
+  padding: 0 2px;
+  line-height: 1;
+}
+
+.task-remove:hover {
+  color: #f87171;
+}
+
+/* Add task */
+.add-task-btn {
+  background: none;
+  border: 1px dashed #3f3f46;
+  border-radius: 8px;
+  color: #71717a;
+  font-size: 12px;
+  padding: 7px;
+  cursor: pointer;
+  text-align: center;
+  transition: border-color 0.15s, color 0.15s;
+}
+
+.add-task-btn:hover {
+  border-color: #6ee7b7;
+  color: #6ee7b7;
+}
+
+.add-task-row {
+  display: flex;
+  gap: 6px;
+}
+
+.add-task-input {
+  flex: 1;
+  background: #27272a;
+  border: 1px solid #3f3f46;
+  border-radius: 8px;
+  color: #f4f4f5;
+  font-size: 13px;
+  padding: 7px 10px;
+  outline: none;
+}
+
+.add-task-input:focus {
+  border-color: #6ee7b7;
+}
+
+.add-task-confirm,
+.add-task-cancel {
+  background: #27272a;
+  border: 1px solid #3f3f46;
+  border-radius: 8px;
+  color: #a1a1aa;
+  font-size: 13px;
+  padding: 7px 12px;
+  cursor: pointer;
+}
+
+.add-task-confirm:hover {
+  background: #14332a;
+  border-color: #6ee7b7;
+  color: #6ee7b7;
+}
+
+/* Strict mode */
+.setup-strict {
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  background: #27272a;
+  border-radius: 10px;
+  padding: 12px 14px;
+}
+
+.strict-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.strict-icon {
+  font-size: 18px;
+}
+
+.strict-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #d4d4d8;
+  display: block;
+}
+
+.strict-desc {
+  font-size: 11px;
+  color: #71717a;
+}
+
+/* Toggle switch */
+.toggle-switch {
+  width: 40px;
+  height: 22px;
+  background: #3f3f46;
+  border: none;
+  border-radius: 11px;
+  cursor: pointer;
+  position: relative;
+  transition: background 0.2s;
+  flex-shrink: 0;
+}
+
+.toggle-switch::after {
+  content: "";
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  background: #71717a;
+  border-radius: 50%;
+  top: 3px;
+  left: 3px;
+  transition: transform 0.2s, background 0.2s;
+}
+
+.toggle-switch.on {
+  background: #065f46;
+}
+
+.toggle-switch.on::after {
+  transform: translateX(18px);
+  background: #6ee7b7;
+}
+
+/* CTA */
+.start-btn {
+  background: #6ee7b7;
+  color: #064e3b;
+  border: none;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 700;
+  padding: 14px;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.1s;
+  width: 100%;
+}
+
+.start-btn:hover {
+  background: #86efac;
+}
+
+.start-btn:active {
+  transform: scale(0.98);
+}
