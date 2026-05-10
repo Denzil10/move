@@ -401,6 +401,22 @@
   pointer-events: none;
 }
 
+.pet-accessory.party-hat {
+  position: absolute;
+  top: -30px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 24px;
+  z-index: 10;
+  animation: party-hop 1s infinite alternate ease-in-out;
+  pointer-events: none;
+}
+
+@keyframes party-hop {
+  from { transform: translateX(-50%) translateY(0) rotate(-10deg); }
+  to { transform: translateX(-50%) translateY(-8px) rotate(10deg); }
+}
+
 .pet-accessory.collar {
   bottom: 5px;
   width: 100%;
@@ -604,22 +620,19 @@
   transition: width 0.3s ease, background-color 0.3s ease;
 }
 
-.pet-movement-progress-container {
-  width: 80px;
-  height: 8px;
-  background: rgba(0, 0, 0, 0.1);
-  border-radius: 4px;
-  margin-top: 10px;
-  overflow: hidden;
-  box-shadow: 0 0 10px rgba(52, 152, 219, 0.5);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+.pet-progress-ring-container {
+  position: absolute;
+  top: -10px;
+  left: -10px;
+  width: 120px;
+  height: 120px;
+  pointer-events: none;
+  z-index: 2;
+  filter: drop-shadow(0 0 5px rgba(52, 152, 219, 0.5));
 }
 
-.pet-movement-progress-bar {
-  height: 100%;
-  background: linear-gradient(90deg, #3498db, #2980b9);
-  transition: width 0.1s linear;
-  box-shadow: 0 0 5px #3498db;
+.pet-progress-ring-fill {
+  transition: stroke-dashoffset 0.1s linear;
 }
 
 .pet-hunger-bar {
@@ -872,6 +885,24 @@
   white-space: nowrap;
   z-index: 10;
   animation: bubble-pop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  transition: all 0.2s ease;
+}
+
+.pet-speech-bubble-actionable {
+  cursor: pointer;
+  border: 2px solid #3498db;
+  animation: bubble-pop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), pulse-border 2s infinite;
+}
+
+.pet-speech-bubble-actionable:hover {
+  transform: translateX(-50%) scale(1.05);
+  background: #f0f8ff;
+}
+
+@keyframes pulse-border {
+  0% { box-shadow: 0 2px 8px rgba(52, 152, 219, 0.2); }
+  50% { box-shadow: 0 2px 15px rgba(52, 152, 219, 0.6); }
+  100% { box-shadow: 0 2px 8px rgba(52, 152, 219, 0.2); }
 }
 
 .pet-speech-bubble::after {
@@ -1193,6 +1224,29 @@
   background: radial-gradient(circle, rgba(255, 64, 129, 0.4) 0%, transparent 70%);
   animation: aura-pulse 2s infinite ease-in-out;
   mix-blend-mode: screen;
+}
+
+.pet-focus-zen-aura {
+  position: absolute;
+  top: -25%;
+  left: -25%;
+  width: 150%;
+  height: 150%;
+  border-radius: 50%;
+  z-index: -3;
+  background: radial-gradient(circle, rgba(52, 152, 219, 0.5) 0%, rgba(0, 191, 255, 0.2) 50%, transparent 70%);
+  animation: focus-zen-pulse 4s infinite ease-in-out, aura-rotate 10s infinite linear;
+  filter: blur(8px);
+}
+
+@keyframes focus-zen-pulse {
+  0%, 100% { transform: scale(1); opacity: 0.4; }
+  50% { transform: scale(1.1); opacity: 0.7; }
+}
+
+@keyframes aura-rotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
 
 .friendship-badge {

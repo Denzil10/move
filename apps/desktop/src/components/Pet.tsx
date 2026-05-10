@@ -7,6 +7,7 @@ import { Season } from "../hooks/useSeasons";
 import { PetFriend } from "../hooks/usePetFriends";
 import { PersonalityType, PERSONALITIES } from "../personalities";
 import { PET_SPECIES } from "../collection";
+import SpriteAnimation from "./SpriteAnimation";
 import "./Pet.css";
 
 export type PetState = "idle" | "disturbed" | "happy" | "floating" | "thinking" | "sleeping" | "chatting" | "training";
@@ -35,9 +36,13 @@ interface PetProps {
   thoughtOverride?: string | null;
   movementProgress?: number;
   activeFriend?: PetFriend | null;
+  isFocusZen?: boolean;
+  adoptionDate?: string;
   onPet?: () => void;
   onPoke?: () => void;
   onChat?: () => void;
+  onDreamRecorded?: (dream: string) => void;
+  onThoughtClick?: () => void;
 }
 
 const Pet: React.FC<PetProps> = ({ 
@@ -64,9 +69,13 @@ const Pet: React.FC<PetProps> = ({
   thoughtOverride = null,
   movementProgress = 0,
   activeFriend = null,
+  isFocusZen = false,
+  adoptionDate,
   onPet,
   onPoke,
-  onChat
+  onChat,
+  onDreamRecorded,
+  onThoughtClick
 }) => {
   const { playGrumble, playChirp } = useSoundEffects();
   const personalityData = PERSONALITIES.find(p => p.id === personality) || PERSONALITIES[0];
@@ -86,6 +95,14 @@ const Pet: React.FC<PetProps> = ({
 
   // Evolution-specific features
   const isAncient = level >= 40;
+
+  const isBirthday = adoptionDate ? (() => {
+    const adoption = new Date(adoptionDate);
+    const today = new Date();
+    return adoption.getMonth() === today.getMonth() && 
+           adoption.getDate() === today.getDate() &&
+           adoption.getFullYear() < today.getFullYear();
+  })() : false;
 
   // sound intensity effect
   const soundScale = 1 + (soundLevel * 0.5); // Max 1.5 scale
@@ -203,11 +220,14 @@ const Pet: React.FC<PetProps> = ({
 
       // Handle sleeping state dreams separately
       if (state === "sleeping") {
-        if (Math.random() > 0.4) {
+        if (Math.random() > 0.85) {
           const dreamPool = personalityData.thoughts.dreams || thoughts.sleeping;
-          setDream(dreamPool[Math.floor(Math.random() * dreamPool.length)]);
+          const pickedDream = dreamPool[Math.floor(Math.random() * dreamPool.length)];
+          setDream(pickedDream);
+          if (onDreamRecorded) onDreamRecorded(pickedDream);
           setTimeout(() => setDream(null), 5000);
         }
+
         return;
       }
 
@@ -233,6 +253,26 @@ const Pet: React.FC<PetProps> = ({
         setThought(thirstyThoughts[Math.floor(Math.random() * thirstyThoughts.length)]);
         setTimeout(() => setThought(null), 4000);
         return;
+      }
+
+      // Check for birthday (Adoption Anniversary)
+      const isBirthday = () => {
+        if (!adoptionDate) return false;
+        const adoption = new Date(adoptionDate);
+        const today = new Date();
+        return adoption.getMonth() === today.getMonth() && 
+               adoption.getDate() === today.getDate() &&
+               adoption.getFullYear() < today.getFullYear();
+      };
+
+      // High chance for birthday thoughts if it's the anniversary
+      if (isBirthday() && Math.random() > 0.4) {
+        const pool = personalityData.thoughts.birthday;
+        if (pool && pool.length > 0) {
+          setThought(pool[Math.floor(Math.random() * pool.length)]);
+          setTimeout(() => setThought(null), 5000);
+          return;
+        }
       }
 
       // High chance for mood, weather, or seasonal thoughts
@@ -285,7 +325,7 @@ const Pet: React.FC<PetProps> = ({
       clearInterval(interval);
       setDream(null);
     };
-  }, [state, hunger, moodCategory, thoughtOverride, personalityData]);
+  }, [state, hunger, hydration, moodCategory, thoughtOverride, personalityData, weatherCondition, season, adoptionDate]);
 
   React.useEffect(() => {
     if (!mousePosition || !petRef.current) return;
@@ -342,15 +382,29 @@ const Pet: React.FC<PetProps> = ({
         animationDuration: `${animationSpeed}s`
       } as React.CSSProperties}
     >
-      <div className="pet-body" style={{ backgroundColor: petColor }}>
-        {speciesId !== "emerald_dragon" && (
+      <div className="pet-body" style={speciesData.spritesheet ? { background: "none", boxShadow: "none" } : { backgroundColor: petColor }}>
+        {speciesData.spritesheet ? (
+          <SpriteAnimation
+            src={speciesData.spritesheet.src}
+            cols={speciesData.spritesheet.cols}
+            cellWidth={speciesData.spritesheet.cellWidth}
+            cellHeight={speciesData.spritesheet.cellHeight}
+            row={speciesData.spritesheet.stateRows[state]?.row ?? speciesData.spritesheet.stateRows.idle.row}
+            frameCount={speciesData.spritesheet.stateRows[state]?.frames ?? speciesData.spritesheet.stateRows.idle.frames}
+            fps={state === "sleeping" ? 4 : state === "floating" ? 12 : 8}
+            scale={0.35}
+            className="sprite-pet"
+          />
+        ) : speciesId !== "emerald_dragon" ? (
           <div className="pet-variant-icon">{speciesData.icon}</div>
-        )}
+        ) : null}
         <div className="pet-mood-aura"></div>
         {showGlow && <div className="pet-glow-aura"></div>}
         {showGlowMax && <div className="pet-glow-max-aura"></div>}
+        {isFocusZen && <div className="pet-focus-zen-aura"></div>}
         {friendshipLevel >= 4 && <div className="pet-friendship-aura"></div>}
         {showSparkles && <div className="sparkle-particle"></div>}
+        {isBirthday && <div className="pet-accessory party-hat">🥳</div>}
         {showFire && <div className="fire-particle"></div>}
         {energy < 20 && <div className="tired-eyes-effect"></div>}
         {isAncient && <div className="pet-accessory horns"></div>}
@@ -420,7 +474,15 @@ const Pet: React.FC<PetProps> = ({
         )}
 
         {(thoughtOverride || thought) && (
-          <div className="pet-speech-bubble">
+          <div 
+            className={`pet-speech-bubble ${onThoughtClick ? "pet-speech-bubble-actionable" : ""}`}
+            onClick={(e) => {
+              if (onThoughtClick) {
+                e.stopPropagation();
+                onThoughtClick();
+              }
+            }}
+          >
             {thoughtOverride || thought}
           </div>
         )}
@@ -442,12 +504,30 @@ const Pet: React.FC<PetProps> = ({
         </div>
       </div>
       {state === "disturbed" && movementProgress > 0 && (
-        <div className="pet-movement-progress-container">
-          <div 
-            className="pet-movement-progress-bar" 
-            style={{ width: `${Math.min(100, movementProgress * 100)}%` }}
-          ></div>
-        </div>
+        <svg className="pet-progress-ring-container" viewBox="0 0 120 120">
+          <circle
+            className="pet-progress-ring-track"
+            cx="60"
+            cy="60"
+            r="54"
+            fill="none"
+            stroke="rgba(0, 0, 0, 0.1)"
+            strokeWidth="4"
+          />
+          <circle
+            className="pet-progress-ring-fill"
+            cx="60"
+            cy="60"
+            r="54"
+            fill="none"
+            stroke="#3498db"
+            strokeWidth="4"
+            strokeLinecap="round"
+            strokeDasharray="339.292"
+            strokeDashoffset={339.292 - (Math.min(1, movementProgress) * 339.292)}
+            transform="rotate(-90 60 60)"
+          />
+        </svg>
       )}
       <div className="pet-hunger-container">
         <div className="pet-hunger-bar" style={{ width: `${hunger}%`, backgroundColor: hunger < 20 ? "#e74c3c" : hunger < 50 ? "#f39c12" : "#2ecc71" }}></div>
