@@ -1,0 +1,1 @@
+## 2024-05-18 - Add ARIA Labels to Close Buttons\n**Learning:** Missing aria-labels on icon-only close buttons affects accessibility. Adding them improves screen reader experience.\n**Action:** Ensure all icon-only buttons have an aria-label attribute.
