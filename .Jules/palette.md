@@ -1,0 +1,3 @@
+## 2024-05-15 - Missing ARIA Labels on Icon-Only Buttons
+**Learning:** Found a widespread accessibility pattern across the application where multiple overlay and toast components (e.g., FriendshipLevelUpToast, PetConversation, PetJournal, etc.) use icon-only close buttons (`×` or `&times;`) without `aria-label`s. This makes it difficult or impossible for screen reader users to understand the button's purpose, as the visual symbol `×` may be read as "times" or ignored entirely.
+**Action:** When implementing new overlays, modals, or toasts, always ensure that icon-only interactive elements (like close or delete buttons) include a descriptive `aria-label` (e.g., `aria-label="Close"`) to provide clear context for assistive technologies.
