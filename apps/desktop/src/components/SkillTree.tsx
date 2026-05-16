@@ -35,7 +35,7 @@ const SkillTree: React.FC<SkillTreeProps> = ({
             <span>Level {currentLevel}</span>
             <span>{currentCoins} 💰</span>
           </div>
-          <button className="close-button" onClick={onClose}>×</button>
+          <button className="close-button" onClick={onClose} aria-label="Close">×</button>
         </div>
 
         <div className="skills-grid">
