@@ -1,0 +1,3 @@
+## 2025-03-09 - Accessible Icon-Only Close Buttons
+**Learning:** The Move Pet application frequently uses icon-only `×` or `&times;` buttons across various components like toasts (e.g., `AchievementToast`, `VictoryToast`) and overlays (`SkillTree`, `PetConversation`). These buttons are missing descriptive text for screen readers, making it difficult for visually impaired users to understand their function.
+**Action:** Always ensure that icon-only interactive components include descriptive `aria-label` attributes (e.g., `aria-label="Close"`) for screen reader accessibility, particularly when using standard UI close buttons (`×`).
