@@ -120,7 +120,7 @@ export default function BreathingExercise({ onClose, onComplete }: BreathingExer
         >
           {isActive ? 'Stop' : 'Start Breathing'}
         </button>
-        <button className="breathing-btn close" onClick={handleClose}>
+        <button className="breathing-btn close" onClick={handleClose} aria-label="Close">
           {cycles > 0 ? 'Finish & Close' : 'Close'}
         </button>
       </div>
