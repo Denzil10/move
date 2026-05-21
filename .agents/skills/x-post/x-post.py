@@ -48,6 +48,7 @@ def load_credentials():
 
 
 def get_client(creds):
+
     from xdk import Client
 
     return Client(
@@ -60,6 +61,7 @@ def get_client(creds):
 
 def get_oauth1_session(creds):
     """Create a requests session with OAuth 1.0a for media upload."""
+
     from requests_oauthlib import OAuth1
 
     auth = OAuth1(
