@@ -1,0 +1,3 @@
+## 2026-05-22 - Added Aria Labels for Close Buttons
+**Learning:** The desktop app relies heavily on modal, overlay, and toast components using a simple '×' text without semantic meaning. Relying purely on visual structure without semantic descriptors makes these ubiquitous app interactions highly inaccessible for screen reader users.
+**Action:** Replaced simple '×' text buttons without labels by providing descriptive aria-label='Close' attributes on existing close-btn classes. All similar interactive micro-components must be checked to include accessible labels, avoiding icon-only or purely structural close buttons.
