@@ -47,7 +47,7 @@ export default function DebugPage({ data, onClose, onReset }: Props) {
       <div className="debug-card">
         <div className="debug-header">
           <h2>Debug</h2>
-          <button onClick={onClose}>×</button>
+          <button aria-label="Close" onClick={onClose}>×</button>
         </div>
 
         <section>
@@ -86,7 +86,7 @@ export default function DebugPage({ data, onClose, onReset }: Props) {
           </table>
         </section>
 
-        <button className="debug-reset-btn" onClick={handleReset}>
+        <button className="debug-reset-btn" aria-label="Reset" onClick={handleReset}>
           Reset all data
         </button>
       </div>

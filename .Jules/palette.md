@@ -1,0 +1,3 @@
+## 2025-05-23 - Add ARIA Labels to Icon-Only Buttons
+**Learning:** Found multiple instances of icon-only close buttons ('×' or '💬' or SVG icons) lacking descriptive ARIA labels in components like toasts, conversation popups, and the floating pet interface. This creates an accessibility barrier for screen reader users trying to dismiss or interact with these elements.
+**Action:** Applied `aria-label="Close"` and similar descriptive labels to all `<button className="close-btn">`, `<button className="close-button">`, `<button className="victory-close">`, `<button className="add-task-cancel">`, and floating bubble task interaction buttons to ensure the desktop app is fully accessible.
