@@ -1,0 +1,3 @@
+## 2024-05-27 - Icon-only buttons lacking ARIA labels
+**Learning:** A common pattern across the app is using an "×" character as the content for close buttons (`<button className="close-btn">×</button>`). Without an `aria-label`, these are completely opaque to screen reader users, who will just hear "button" or "times button".
+**Action:** When implementing or modifying icon-only buttons (like close buttons, settings icons, etc.), always explicitly provide an `aria-label` attribute describing the action (e.g., `aria-label="Close"`).
