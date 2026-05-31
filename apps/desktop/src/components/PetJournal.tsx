@@ -100,7 +100,7 @@ const PetJournal: React.FC<PetJournalProps> = ({
       <div className="journal-container">
         <div className="journal-header">
           <h2>Pet Journal</h2>
-          <button className="close-btn" onClick={onClose}>×</button>
+          <button aria-label="Close" className="close-btn" onClick={onClose}>×</button>
         </div>
 
         <div className="journal-tabs">
