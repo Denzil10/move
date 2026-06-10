@@ -1,0 +1,3 @@
+## 2024-06-10 - Screen reader support for interactive overlay icon buttons
+**Learning:** In desktop overlay environments like Tauri where small interactive elements (e.g. "snooze", "done", "close") are frequently used to minimize UI footprint, screen readers lack context entirely if these icon-only SVGs or unicode characters (like 💬 or ×) don't have aria-labels. Given the frequent dynamic nature of these elements (e.g., dynamically showing task bubbles), missing accessibility labels cause a major navigational hurdle.
+**Action:** Always add descriptive `aria-label` tags (e.g., "Snooze task", "Mark task as done", "Close") to any button that uses only an icon/emoji to communicate its action.
