@@ -1,0 +1,3 @@
+## 2024-05-14 - Widespread ARIA label omission on dynamic icon buttons
+**Learning:** Found an app-specific pattern where developers rely heavily on single-character emojis (`×`, `💬`, `🔥`) and inline SVGs for interactive buttons without pairing them with `aria-label` or visually-hidden text. This causes a widespread accessibility gap where screen readers will announce unhelpful context like "times" or fail to announce anything at all for the floating task actions.
+**Action:** Mass-injected descriptive `aria-label`s across all major toast and task management components. Created a mental rule: whenever adding a new feature that includes a toast, modal, or floating bubble, explicitly verify the presence of `aria-label` on the close/action buttons before creating a PR.
