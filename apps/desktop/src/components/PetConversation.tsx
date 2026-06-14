@@ -115,7 +115,7 @@ const PetConversation: React.FC<PetConversationProps> = ({ personality, petName,
       <div className="pet-conversation-window" onClick={e => e.stopPropagation()}>
         <div className="conversation-header">
           <h3>Chat with {petName}</h3>
-          <button className="close-btn" onClick={onClose}>×</button>
+          <button aria-label="Close" className="close-btn" onClick={onClose}>×</button>
         </div>
         <div className="conversation-messages">
           {messages.map((m, i) => (
