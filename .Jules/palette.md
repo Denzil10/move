@@ -1,0 +1,3 @@
+## 2024-10-24 - Widespread Missing ARIA Labels in Toasts & Modals
+**Learning:** The application heavily relies on floating UI components (toasts, journals, level-up notifications) which use "×" or "&times;" symbols for close actions. These interactive buttons were broadly missing `aria-label="Close"`, rendering them invisible or confusing to screen readers because they lacked semantic descriptions.
+**Action:** Always verify that newly created popups, modals, toasts, or overlays include a descriptive `aria-label` attribute on their respective icon-only action buttons (especially dismiss actions) during initial development to prevent systematic accessibility regressions.
