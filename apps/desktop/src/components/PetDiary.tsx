@@ -89,6 +89,7 @@ const PetDiary: React.FC<PetDiaryProps> = ({
                 <span className="entry-mood-icon">{entry.mood === "joyful" ? "😊" : entry.mood === "content" ? "🙂" : entry.mood === "grumpy" ? "😠" : "😐"}</span>
                 <span className="current-level-hint">(You: Lv. {currentLevel})</span>
                 <button 
+                  aria-label="Delete entry"
                   className="delete-entry-btn" 
                   onClick={() => onDeleteEntry(entry.id)}
                   title="Delete entry"
