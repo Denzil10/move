@@ -1,0 +1,3 @@
+## 2025-03-08 - Accessible Icon Buttons
+**Learning:** The Move Pet desktop app relies extensively on icon-only buttons (like "×" for close actions, "💬" for chat, "📤" for share) in modals, toasts, and overlays. Historically, these components were implemented without accessible names, limiting screen reader support and overall accessibility.
+**Action:** When adding new close buttons, icon buttons, or toasts in React components, always enforce the inclusion of `aria-label` attributes to ensure they are fully accessible for screen readers, while preserving the existing generic `close-btn` or similar CSS class mappings.
