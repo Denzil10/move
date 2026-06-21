@@ -1,0 +1,3 @@
+## 2023-10-25 - App-wide Missing ARIA labels on modal/toast Close buttons
+**Learning:** The Move Pet application heavily relies on floating toasts, overlays, and side-panels, all of which use a generic icon-only '×' button to close. None of these buttons natively had `aria-label` attributes, presenting a significant screen reader accessibility gap across the entire UX suite.
+**Action:** Implemented a targeted pass across all `src/components/` and `src/screens/` files to add `aria-label="Close"` specifically to these icon-only buttons (like `×` or `&times;`) without disrupting their visual design or adding new custom CSS classes. Next time we add a new modal component, ensure the close button comes with an accessible label by default.
