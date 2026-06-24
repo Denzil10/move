@@ -1,0 +1,3 @@
+## 2024-06-25 - [Accessibility Issue Pattern: Aria labels on close buttons]
+**Learning:** This app extensively relies on icon-only buttons with the text '×' and '💬' to denote close and chat buttons. However, several of these are missing descriptive `aria-label`s, preventing screen readers from accurately reading the function of these buttons. The React frontend relies on these single-character emojis/symbols without other visual cues as well.
+**Action:** Always verify that newly created toast/dialog elements containing a simple `×` or emoji button have `aria-label="Close"` or corresponding action text for full accessibility. Added an aria-label to existing instances.
