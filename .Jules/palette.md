@@ -1,0 +1,3 @@
+## 2024-06-25 - ARIA Labels for Icon-only Interactions
+**Learning:** The React frontend application extensively utilizes single-character emojis (like ×) and inline SVGs to function as interactive icon-only buttons (such as in FloatingPet task bubbles, Toast notifications, and journals/modals). Because these buttons lack meaningful text content, they are completely inaccessible to screen readers without an explicitly defined `aria-label`.
+**Action:** Always proactively search for and verify that any new or existing interactive components leveraging standalone emojis or SVGs as buttons include descriptive `aria-label` attributes to ensure consistent screen reader accessibility across the app.
