@@ -1,0 +1,3 @@
+## 2024-06-29 - Missing ARIA Labels on Emoji/SVG Buttons
+**Learning:** The Move Pet desktop React frontend relies extensively on single-character emojis (like ×, 💬) and inline SVGs for interactive icon-only action buttons (e.g., toasts, modals, floating task bubbles). Many of these were implemented without `aria-label` attributes, creating a significant accessibility gap for screen readers.
+**Action:** Always verify that newly added components using emoji or SVG icon-only buttons include descriptive `aria-label` attributes (e.g., `aria-label="Close"`, `aria-label="Snooze Task"`) to maintain accessibility standard without altering visible UI.
