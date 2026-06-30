@@ -136,7 +136,7 @@ export default function SetupScreen({ onDone }: Props) {
                 }}
               />
               <button className="add-task-confirm" onClick={addCustomTask}>Add</button>
-              <button className="add-task-cancel" onClick={() => setAddingTask(false)}>×</button>
+              <button aria-label="Close" className="add-task-cancel" onClick={() => setAddingTask(false)}>×</button>
             </div>
           ) : (
             <button className="add-task-btn" onClick={() => setAddingTask(true)}>
