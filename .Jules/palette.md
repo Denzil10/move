@@ -1,0 +1,3 @@
+## 2024-05-24 - Accessibility for Icon-only Close Buttons
+**Learning:** The Move Pet desktop app relies extensively on custom React components for toasts, journals, and overlays (e.g. `VictoryToast`, `PetJournal`, `QuestJournal`) that use a simple text character (`×`) within a `<button>` tag to close the dialog. These were systematically missing ARIA labels, making them inaccessible to screen readers.
+**Action:** Always ensure that icon-only interactive elements, especially close buttons using a text multiplier sign `×`, include descriptive attributes such as `aria-label="Close"` to meet basic accessibility standards without modifying existing CSS class structures.
