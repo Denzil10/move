@@ -1,0 +1,3 @@
+## 2024-05-24 - Accessibility for Icon-only Close Buttons
+**Learning:** In Move Pet, there are many custom overlay/toast components with a close button simply rendered as `×` or `&times;` without text. Because they lack visible text, they rely heavily on `aria-label` to be accessible. A pattern was discovered where several of these toast/overlay components lacked `aria-label="Close"`, violating accessibility best practices.
+**Action:** When adding or auditing floating components (like toasts, journals, modals), always explicitly add `aria-label="Close"` to buttons showing only `×` or `&times;`. Avoid relying on visual-only content for these interaction types.
