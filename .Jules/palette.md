@@ -1,0 +1,3 @@
+## 2024-07-05 - ARIA Labels for Icon-Only Buttons
+**Learning:** Found multiple instances of icon-only buttons (like "×" for closing or "💬" for chat) that lacked descriptive text for screen readers. In this app, many small toast and floating bubble components rely on these minimalist icon buttons for layout reasons, making them particularly vulnerable to accessibility gaps.
+**Action:** Always verify that newly created close buttons, floating bubble buttons, or other icon-only UI elements include an explicitly descriptive `aria-label` attribute (e.g., `aria-label="Close"`, `aria-label="Complete task"`).
