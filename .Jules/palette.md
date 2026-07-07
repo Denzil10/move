@@ -1,0 +1,3 @@
+## 2024-07-07 - Add ARIA Labels to Icon-Only Close Buttons
+**Learning:** Found a recurring pattern where toast, overlay, and modal components used icon-only close buttons (`×` and `&times;`) without ARIA labels, creating a widespread accessibility gap for screen reader users across 12 different files.
+**Action:** When implementing new UI patterns such as toasts or floating overlays in this app, explicitly enforce the rule that interactive elements utilizing symbol-only content must have `aria-label` attributes. Add `aria-label="Close"` to all existing generic close buttons and verify in future PRs.
