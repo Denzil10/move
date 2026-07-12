@@ -1,0 +1,3 @@
+## 2024-05-14 - App-wide Action Buttons Missing ARIA Labels
+**Learning:** Found a systemic pattern in Move Pet where icon-only buttons for close (×) and chat (💬) actions were lacking screen reader accessible labels, negatively impacting the experience for users who rely on assistive technologies.
+**Action:** Implemented `aria-label` attributes across all affected toast notifications, journals, and the main pet interaction components to resolve this app-specific accessibility gap. Should explicitly review all new single-character emoji and inline SVG buttons moving forward to verify they include meaningful ARIA labels before submitting PRs.
