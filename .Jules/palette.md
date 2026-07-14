@@ -1,0 +1,3 @@
+## 2024-07-14 - Accessible Icon-Only Buttons
+**Learning:** This application heavily utilizes single-character emojis and text symbols (like ×, &times;, and 💬) for interactive elements such as close buttons across various toasts and modals. These buttons lack visible text and accessible names, rendering them confusing or invisible to screen reader users.
+**Action:** Always ensure that icon-only interactive components (like close buttons using '×') are explicitly provided with an `aria-label` attribute (e.g., `aria-label="Close"`) to maintain accessibility, while avoiding overriding visible text in other buttons.
