@@ -1,0 +1,3 @@
+## 2024-07-15 - Missing ARIA Labels on Icon-only Buttons
+**Learning:** The Move Pet desktop app relies extensively on SVG and emoji-based icon-only buttons (like snooze, done, and close) for micro-interactions, especially in the transparent, always-on-top FloatingPet overlay. While these have visual cues, many lack descriptive `aria-label` attributes, creating a critical accessibility barrier for screen readers in a highly interactive component.
+**Action:** When adding or modifying interactive elements such as bubbles, toasts, or modals in this application, explicitly verify that all action buttons (especially those containing only SVGs or text like '×') include a descriptive `aria-label`.
