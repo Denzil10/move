@@ -1,0 +1,3 @@
+## 2024-05-18 - Floating Action Button Accessibility
+**Learning:** Floating, highly interactive UI components like task management bubbles in this app rely almost entirely on single-character emojis and inline SVGs for layout compactness (e.g. Snooze '💤' or 'svg', Done 'svg'). Because these elements sit in a borderless window overlay and trigger core app loop state changes, screen readers must be explicitly informed via `aria-label` since the semantic context from nearby text is minimal.
+**Action:** Always verify `aria-label` is present on any new icon-only overlay button added to `.bubble` or floating widget components to ensure the core interaction loop remains keyboard- and screen-reader accessible.
