@@ -200,7 +200,7 @@ export default function FloatingPet({ data, onDataChange }: Props) {
           <div className="move-header">
             <span className="move-emoji">{isMoving ? "🏃" : "🧍"}</span>
             <span className="move-label">{isMoving ? "Moving…" : "Start moving!"}</span>
-            <button className="snooze-icon" onClick={handleSnooze} title="Later">
+            <button className="snooze-icon" onClick={handleSnooze} title="Later" aria-label="Snooze reminder">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
             </button>
           </div>
@@ -216,10 +216,10 @@ export default function FloatingPet({ data, onDataChange }: Props) {
         <div className="bubble">
           <span className="bubble-task">{activeTask.emoji} {activeTask.title}</span>
           <div className="bubble-actions">
-            <button className="bubble-btn done" onClick={() => handleTaskComplete(activeTask.id)} title="Done">
+            <button className="bubble-btn done" onClick={() => handleTaskComplete(activeTask.id)} title="Done" aria-label="Mark task as done">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
             </button>
-            <button className="bubble-btn later" onClick={handleSnooze} title="Later">
+            <button className="bubble-btn later" onClick={handleSnooze} title="Later" aria-label="Snooze task">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
             </button>
           </div>
