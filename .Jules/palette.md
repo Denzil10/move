@@ -1,0 +1,3 @@
+## 2026-07-21 - Accessibility of Icon-Only Close Buttons in React Components
+**Learning:** The Move Pet desktop app relies heavily on custom interactive UI elements, notably toasts and modal dashboards, using single-character emojis or HTML symbols (e.g., '×' or '&times;') as close buttons. Because these components are purely functional without descriptive text in the DOM, screen readers announce generic or confusing text (like 'times' or nothing at all), causing a significant accessibility violation under WCAG 2.5.3.
+**Action:** When creating or modifying modals, toasts, or tooltips with icon-only close buttons, always strictly ensure `aria-label="Close"` is applied on the `<button>` element.
