@@ -1,0 +1,3 @@
+## 2024-05-24 - Accessibility gaps in custom Toast pattern
+**Learning:** The application's custom toast notifications (like FriendshipLevelUpToast, VictoryToast, GoalReachedToast) consistently lack `aria-label` attributes on their icon-only close buttons. This is a common accessibility gap in bespoke UI components that causes screen readers to announce an unhelpful character like 'times' instead of a descriptive action.
+**Action:** When implementing or reviewing new toast/notification components in this application's design system, explicitly verify that all interactive icon-only elements include descriptive ARIA labels.
