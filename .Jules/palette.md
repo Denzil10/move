@@ -1,0 +1,3 @@
+## 2024-03-24 - Accessibility Missing on Toasts and Icons
+**Learning:** Found multiple icon-only buttons across the application (like `×` for closing toasts, and `💬` for chat) that completely lack `aria-label` attributes, making them inaccessible to screen readers. In contrast, standard buttons with text like "Feed" or "Water" are accessible. The specific problem pattern is that many toast notification components use `×` or `&times;` inside `<button>` elements with no accessibility labels.
+**Action:** When working on micro-UX enhancements, prioritize auditing all `.tsx` files in `apps/desktop/src/components/` for `×`, `&times;`, and other icon-only components, then add descriptive `aria-label`s to them.
