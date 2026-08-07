@@ -18,7 +18,7 @@ const FriendToast: React.FC<FriendToastProps> = ({ friend, onClose }) => {
           Effect: +{Math.round((friend.buffValue - 1) * 100)}% {friend.buffType} for {friend.durationMinutes}m
         </p>
       </div>
-      <button className="victory-close" onClick={onClose} style={{ top: '10px', right: '10px' }}>×</button>
+      <button className="victory-close" onClick={onClose} aria-label="Close" style={{ top: '10px', right: '10px' }}>×</button>
     </div>
   );
 };
