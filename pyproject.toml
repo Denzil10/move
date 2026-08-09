@@ -119,4 +119,5 @@ python-version = "3.14"
 [tool.ty.analysis]
 # Optional voice_local extra: torch, transformers, librosa for local whisper transcription
 # Optional voice extra: nvidia-riva-client for nvidia_nim transcription provider
-allowed-unresolved-imports = ["torch", "transformers", "librosa", "riva.client"]
+# XDK / OAuth1 are dynamically imported for Twitter poster tools.
+allowed-unresolved-imports = ["torch", "transformers", "librosa", "riva.client", "xdk", "requests_oauthlib"]
