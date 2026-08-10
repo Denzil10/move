@@ -1,0 +1,3 @@
+## 2026-08-10 - Adding aria labels to toast components
+**Learning:** Icon-only close buttons on toasts (e.g., FriendshipLevelUpToast, VictoryToast, GoalReachedToast, AchievementToast) are a common pattern in this app and require explicit `aria-label` attributes to ensure screen reader accessibility. If missed, screen readers only read the '×' character (which may be read as 'times' or ignored) instead of 'Close notification'.
+**Action:** When creating new toast notifications or modifying existing ones, explicitly check for and add `aria-label="Close notification"` to the icon-only close buttons to ensure accessibility compliance.
