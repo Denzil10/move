@@ -500,7 +500,7 @@ const Pet: React.FC<PetProps> = ({
           </div>
         )}
         <div className="pet-interaction-overlay">
-          <button className="chat-btn" onClick={(e) => { e.stopPropagation(); if (onChat) onChat(); }} title="Chat with Pet">💬</button>
+          <button aria-label="Chat with Pet" className="chat-btn" onClick={(e) => { e.stopPropagation(); if (onChat) onChat(); }} title="Chat with Pet">💬</button>
         </div>
       </div>
       {state === "disturbed" && movementProgress > 0 && (
