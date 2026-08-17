@@ -119,4 +119,5 @@ python-version = "3.14"
 [tool.ty.analysis]
 # Optional voice_local extra: torch, transformers, librosa for local whisper transcription
 # Optional voice extra: nvidia-riva-client for nvidia_nim transcription provider
-allowed-unresolved-imports = ["torch", "transformers", "librosa", "riva.client"]
+# External agents/skills dependencies: xdk, requests_oauthlib
+allowed-unresolved-imports = ["torch", "transformers", "librosa", "riva.client", "xdk", "requests_oauthlib"]
