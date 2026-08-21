@@ -1,0 +1,3 @@
+## 2024-05-24 - Accessibility gaps in emoji/symbol icon-only buttons
+**Learning:** The application heavily utilizes single-character emojis (like ×, 💬, 🔥) and HTML entities (like &times;) for interactive icon-only buttons across various components (toasts, modals, floating bubbles). These lack descriptive `aria-label` attributes, which creates an accessibility gap for screen reader users as they will hear non-descriptive characters read out instead of the intended function.
+**Action:** Always explicitly check for and add descriptive `aria-label` attributes (e.g., `aria-label="Close"`) when creating or modifying icon-only buttons, especially those using text symbols instead of explicit SVG icons, to ensure WCAG compliance and improve screen reader experiences.
