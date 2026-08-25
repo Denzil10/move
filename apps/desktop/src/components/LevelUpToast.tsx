@@ -45,7 +45,7 @@ const LevelUpToast: React.FC<LevelUpToastProps> = ({
           <p className="congrats">Keep moving to grow together.</p>
         )}
       </div>
-      <button className="close-btn" onClick={handleClose}>×</button>
+      <button aria-label="Close" className="close-btn" onClick={handleClose}>×</button>
     </div>
   );
 };
