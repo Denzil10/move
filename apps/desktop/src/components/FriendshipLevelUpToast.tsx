@@ -41,7 +41,7 @@ const FriendshipLevelUpToast: React.FC<FriendshipLevelUpToastProps> = ({
           <span className="bonus-text">+{Math.round((multiplier - 1) * 100)}% Coins & XP Multiplier</span>
         </div>
       </div>
-      <button className="close-btn" onClick={handleClose}>×</button>
+      <button className="close-btn" aria-label="Close friendship toast" onClick={handleClose}>×</button>
     </div>
   );
 };

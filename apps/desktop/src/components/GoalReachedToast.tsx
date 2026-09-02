@@ -36,7 +36,7 @@ const GoalReachedToast: React.FC<GoalReachedToastProps> = ({
         <p>You've burned <strong>{goal}</strong> calories today.</p>
         <p className="praise">Incredible consistency! Your pet is so proud of you.</p>
       </div>
-      <button className="close-btn" onClick={handleClose}>×</button>
+      <button className="close-btn" aria-label="Close goal toast" onClick={handleClose}>×</button>
     </div>
   );
 };
