@@ -92,6 +92,7 @@ const PetDiary: React.FC<PetDiaryProps> = ({
                   className="delete-entry-btn" 
                   onClick={() => onDeleteEntry(entry.id)}
                   title="Delete entry"
+                  aria-label="Delete entry"
                 >
                   &times;
                 </button>
