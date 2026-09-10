@@ -47,7 +47,7 @@ export default function DebugPage({ data, onClose, onReset }: Props) {
       <div className="debug-card">
         <div className="debug-header">
           <h2>Debug</h2>
-          <button onClick={onClose}>×</button>
+          <button onClick={onClose} aria-label="Close">×</button>
         </div>
 
         <section>
