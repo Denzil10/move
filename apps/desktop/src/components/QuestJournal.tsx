@@ -26,7 +26,7 @@ const QuestJournal: React.FC<QuestJournalProps> = ({
       <div className="quest-journal-content">
         <div className="quest-journal-header">
           <h2>Quest Journal</h2>
-          <button className="close-btn" onClick={onClose}>×</button>
+          <button className="close-btn" onClick={onClose} aria-label="Close">×</button>
         </div>
 
         <div className="quest-tabs">
