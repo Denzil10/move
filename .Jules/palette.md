@@ -1,0 +1,3 @@
+## 2024-05-18 - Missing aria-labels on Interactive Icon Buttons
+**Learning:** This application heavily relies on interactive icon-only buttons (`×` close buttons in toasts/modals, checkmarks/snooze icons in task bubbles) for UX without proper descriptive text. This causes severe accessibility gaps where screen reader users hear empty or uninformative elements.
+**Action:** When adding or auditing micro-UX patterns involving icon-only elements (like toasts or floating action bubbles), strictly enforce the addition of explicit `aria-label` attributes (e.g., `aria-label="Close"`, `aria-label="Mark as done"`, `aria-label="Snooze task"`) to preserve functionality for non-visual navigation.
