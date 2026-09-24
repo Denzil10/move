@@ -14,7 +14,7 @@ const Collection: React.FC<CollectionProps> = ({ unlockedSpecies, recentlyDiscov
       <div className="collection-modal">
         <div className="collection-header">
           <h2>Pet Collection</h2>
-          <button className="close-btn" onClick={onClose}>&times;</button>
+          <button aria-label="Close" className="close-btn" onClick={onClose}>&times;</button>
         </div>
         
         {recentlyDiscovered && (
