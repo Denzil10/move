@@ -49,7 +49,7 @@ const VictoryToast: React.FC<VictoryToastProps> = ({
         )}
         <p>Estimated <strong>{calories}</strong> calories burned.</p>
       </div>
-      <button className="close-btn" onClick={() => setIsVisible(false)}>×</button>
+      <button aria-label="Close" className="close-btn" onClick={() => setIsVisible(false)}>×</button>
     </div>
   );
 };
