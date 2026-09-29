@@ -35,7 +35,7 @@ const AchievementToast: React.FC<AchievementToastProps> = ({
         <h3>{title}</h3>
         <p>{description}</p>
       </div>
-      <button className="close-btn" onClick={() => setIsVisible(false)}>×</button>
+      <button aria-label="Close" className="close-btn" onClick={() => setIsVisible(false)}>×</button>
     </div>
   );
 };
