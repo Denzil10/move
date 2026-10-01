@@ -16,7 +16,7 @@ const AppUsageReport: React.FC<AppUsageReportProps> = ({ appUsage, onClose }) =>
   return (
     <div className="app-usage-report-overlay">
       <div className="app-usage-report">
-        <button className="close-btn" onClick={onClose}>×</button>
+        <button className="close-btn" onClick={onClose} aria-label="Close">×</button>
         <h3>Productivity Focus Report 📈</h3>
         
         {totalTime === 0 ? (
