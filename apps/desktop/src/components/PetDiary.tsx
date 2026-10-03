@@ -90,6 +90,7 @@ const PetDiary: React.FC<PetDiaryProps> = ({
                 <span className="current-level-hint">(You: Lv. {currentLevel})</span>
                 <button 
                   className="delete-entry-btn" 
+                  aria-label="Delete entry"
                   onClick={() => onDeleteEntry(entry.id)}
                   title="Delete entry"
                 >
